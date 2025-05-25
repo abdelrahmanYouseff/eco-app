@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\owner\auth\LoginController;
+use App\Http\Controllers\owner\Auth\LoginController;
 use App\Http\Controllers\owner\CompanyController;
 use App\Http\Controllers\owner\UserController;
 use App\Http\Controllers\owner\ServiceController;
