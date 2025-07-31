@@ -53,3 +53,8 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/building/admin/dashboard', [LoginController::class, 'adminDashboardView'])
 ->name('building.admin.dashboard');
+
+// Privacy Policy Route
+Route::get('/privacy', function () {
+    return view('privacy');
+})->name('privacy');
