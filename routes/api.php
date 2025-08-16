@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\VisitorController;
 use App\Http\Controllers\Api\MaintenanceRequestController;
+use App\Http\Controllers\Api\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,3 +40,8 @@ Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::post('/visitors', [VisitorController::class, 'store']);
 Route::get('/visitors/by-user-company/{userId}', [VisitorController::class, 'getVisitorsByUserCompany']);
 Route::post('/maintenance-requests', [MaintenanceRequestController::class, 'store']);
+
+// Webhook routes
+Route::post('/webhook', [WebhookController::class, 'receive']);
+Route::get('/webhook/requests', [WebhookController::class, 'show']);
+Route::delete('/webhook/clear', [WebhookController::class, 'clear']);

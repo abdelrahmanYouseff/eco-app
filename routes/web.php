@@ -5,6 +5,7 @@ use App\Http\Controllers\owner\CompanyController;
 use App\Http\Controllers\owner\UserController;
 use App\Http\Controllers\owner\ServiceController;
 use App\Http\Controllers\owner\EventController;
+use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,3 +59,6 @@ Route::get('/building/admin/dashboard', [LoginController::class, 'adminDashboard
 Route::get('/privacy', function () {
     return view('privacy');
 })->name('privacy');
+
+// Webhook Routes
+Route::get('/webhook/requests', [WebhookController::class, 'show'])->name('webhook.requests');
