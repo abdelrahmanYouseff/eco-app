@@ -1,5 +1,30 @@
 @extends('master')
 @section('content')
+
+@if(session('success'))
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: "{{ session('success') }}",
+      confirmButtonText: 'OK'
+    });
+  </script>
+@endif
+
+@if(session('error'))
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: "{{ session('error') }}",
+      confirmButtonText: 'OK'
+    });
+  </script>
+@endif
+
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-10 ms-auto">
@@ -69,6 +94,12 @@
                                         onclick="copyBadgeId('{{ $user->badge_id }}')" title="Copy Badge ID">
                                     <i class="ti ti-copy"></i>
                                 </button>
+                                @if(auth()->id() != $user->id)
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteUser({{ $user->id }}, '{{ $user->name }}')" title="Delete User">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -104,6 +135,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 function viewUserDetails(userId) {
@@ -165,6 +197,44 @@ function copyBadgeId(badgeId) {
     }).catch(function(err) {
         console.error('Could not copy text: ', err);
         alert('Failed to copy Badge ID');
+    });
+}
+
+function deleteUser(userId, userName) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you want to delete user "${userName}"? This action cannot be undone.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // إنشاء form للحذف
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/users/${userId}`;
+
+            // إضافة CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            form.appendChild(csrfToken);
+
+            // إضافة method override
+            const methodField = document.createElement('input');
+            methodField.type = 'hidden';
+            methodField.name = '_method';
+            methodField.value = 'DELETE';
+            form.appendChild(methodField);
+
+            // إضافة form للصفحة وتشغيله
+            document.body.appendChild(form);
+            form.submit();
+        }
     });
 }
 </script>

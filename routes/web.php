@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/add', [UserController::class, 'addNewUserView'])->name('user.add');
     Route::get('/user/list', [UserController::class, 'userList'])->name('user.list');
     Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
     // Gates Routes
     Route::get('/gates/access-logs', [GatesController::class, 'accessLogs'])->name('gates.access.logs');
