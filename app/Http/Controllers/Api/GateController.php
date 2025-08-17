@@ -28,4 +28,25 @@ class GateController extends Controller
 
         return response()->json(['message' => 'Already inside.'], 403);
     }
+
+    public function gate(Request $request)
+    {
+        // استقبال البيانات
+        $secret = $request->input('secret');
+        $qrCodeValue = $request->input('qr_code_value');
+
+        // طباعة البيانات المستلمة
+        echo "تم استلام البيانات التالية:\n";
+        echo "Secret: " . $secret . "\n";
+        echo "QR Code Value: " . $qrCodeValue . "\n";
+
+        // إرجاع الرد
+        return response()->json([
+            'message' => 'تم استلام البيانات التالية!',
+            'data' => [
+                'secret' => $secret,
+                'qr_code_value' => $qrCodeValue
+            ]
+        ]);
+    }
 }

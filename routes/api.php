@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/open-gate', [GateController::class, 'open']);
+Route::post('/gate', [GateController::class, 'gate']);
 
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::post('/visitors', [VisitorController::class, 'store']);

@@ -116,3 +116,4 @@ curl_close($ch);
 2. تحقق من صلاحيات الكتابة في مجلد storage
 3. تأكد من أن Laravel يعمل بشكل صحيح
 4. تحقق من سجلات الأخطاء في `storage/logs/laravel.log`
+
