@@ -49,6 +49,16 @@
             </a>
           </li>
 
+          <li class="pc-item pc-caption">
+            <label>Gates</label>
+            <i class="ti ti-door"></i>
+          </li>
+          <li class="pc-item">
+            <a href="{{ route('gates.access.logs') }}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-door-enter"></i></span>
+              <span class="pc-mtext">Access Logs</span>
+            </a>
+          </li>
 
           <li class="pc-item pc-caption">
             <label>Services</label>
