@@ -12,8 +12,11 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Role</th>
+                        <th>Badge ID</th>
                         <th>Company</th>
+                        <th>Status</th>
                         <th>Created At</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,19 +28,49 @@
                         <td>{{ $user->phone }}</td>
                         <td>
                             @if($user->role === 'building_admin')
-                                Building Admin
+                                <span class="badge bg-primary">Building Admin</span>
                             @elseif($user->role === 'company_admin')
-                                Company Admin
+                                <span class="badge bg-success">Company Admin</span>
                             @elseif($user->role === 'employee')
-                                Employee
+                                <span class="badge bg-info">Employee</span>
                             @elseif($user->role === 'visitor')
-                                Visitor
+                                <span class="badge bg-warning">Visitor</span>
                             @else
-                                {{ $user->role }}
+                                <span class="badge bg-secondary">{{ $user->role }}</span>
                             @endif
                         </td>
+                        <td>
+                            <code class="text-primary">{{ $user->badge_id ?? 'N/A' }}</code>
+                        </td>
                         <td>{{ $user->company_name ?? 'N/A' }}</td>
-                        <td>{{ $user->created_at }}</td>
+                        <td>
+                            @if($user->is_inside)
+                                <span class="badge bg-success">
+                                    <i class="ti ti-login me-1"></i> Inside
+                                </span>
+                            @else
+                                <span class="badge bg-danger">
+                                    <i class="ti ti-logout me-1"></i> Outside
+                                </span>
+                            @endif
+                        </td>
+                        <td>{{ $user->created_at ? $user->created_at->format('Y-m-d H:i') : 'N/A' }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="viewUserDetails({{ $user->id }})" title="View Details">
+                                    <i class="ti ti-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info"
+                                        onclick="generateQRCode('{{ $user->badge_id }}')" title="Generate QR Code">
+                                    <i class="ti ti-qrcode"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        onclick="copyBadgeId('{{ $user->badge_id }}')" title="Copy Badge ID">
+                                    <i class="ti ti-copy"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -46,4 +79,93 @@
     </div>
 </div>
 
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrcode"></div>
+                <p class="mt-3">
+                    <code id="badgeIdDisplay"></code>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadQRCode()">Download</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+function viewUserDetails(userId) {
+    // يمكن إضافة تفاصيل أكثر للمستخدم هنا
+    alert('User details for ID: ' + userId);
+}
+
+function generateQRCode(badgeId) {
+    if (!badgeId || badgeId === 'N/A') {
+        alert('No Badge ID available for this user');
+        return;
+    }
+
+    document.getElementById('badgeIdDisplay').textContent = badgeId;
+
+    // إنشاء QR Code
+    QRCode.toCanvas(document.getElementById('qrcode'), badgeId, {
+        width: 200,
+        margin: 2,
+        color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+        }
+    }, function (error) {
+        if (error) console.error(error);
+    });
+
+    // عرض Modal
+    new bootstrap.Modal(document.getElementById('qrCodeModal')).show();
+}
+
+function downloadQRCode() {
+    const canvas = document.querySelector('#qrcode canvas');
+    const link = document.createElement('a');
+    link.download = 'qr-code.png';
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+function copyBadgeId(badgeId) {
+    if (!badgeId || badgeId === 'N/A') {
+        alert('No Badge ID available for this user');
+        return;
+    }
+
+    navigator.clipboard.writeText(badgeId).then(function() {
+        // إظهار رسالة نجاح
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="ti ti-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+
+        setTimeout(function() {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+        alert('Failed to copy Badge ID');
+    });
+}
+</script>
+@endpush
