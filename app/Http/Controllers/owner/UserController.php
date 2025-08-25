@@ -19,15 +19,44 @@ class UserController extends Controller
     }
 
 
-    public function userList(){
-        $users = User::all();
+        public function userList(Request $request){
+        // Get all companies for filter
+        $companies = Company::all();
+
+        // Build query with filters
+        $query = User::query();
+
+        // Filter by company if specified
+        if ($request->filled('company_id')) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        // Filter by name if entered
+        if ($request->filled('search_name')) {
+            $query->where('name', 'like', '%' . $request->search_name . '%');
+        }
+
+        // Filter by role if specified
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        $users = $query->get();
+
+        // Add company names
         $usersWithCompanyNames = $users->map(function ($user) {
             $company = Company::find($user->company_id);
             $user->company_name = $company ? $company->name : null;
             return $user;
         });
 
-        return view('owner.users.user_list', ['users' => $usersWithCompanyNames]);
+        return view('owner.users.user_list', [
+            'users' => $usersWithCompanyNames,
+            'companies' => $companies,
+            'selectedCompany' => $request->company_id,
+            'searchName' => $request->search_name,
+            'selectedRole' => $request->role
+        ]);
     }
 
 

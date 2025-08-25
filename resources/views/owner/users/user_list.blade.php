@@ -29,6 +29,94 @@
     <div class="row">
         <div class="col-md-10 ms-auto">
             <h2 class="mb-4">User List</h2>
+
+                        <!-- Search and Filter Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ti ti-search me-2"></i>Search & Filter
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ route('user.list') }}" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="search_name" class="form-label">User Name</label>
+                            <input type="text" class="form-control" id="search_name" name="search_name"
+                                   value="{{ $searchName ?? '' }}" placeholder="Search by name...">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="company_id" class="form-label">Company</label>
+                            <select class="form-select" id="company_id" name="company_id">
+                                <option value="">All Companies</option>
+                                @foreach($companies as $company)
+                                    <option value="{{ $company->id }}"
+                                            {{ ($selectedCompany ?? '') == $company->id ? 'selected' : '' }}>
+                                        {{ $company->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" name="role">
+                                <option value="">All Roles</option>
+                                <option value="building_admin" {{ ($selectedRole ?? '') == 'building_admin' ? 'selected' : '' }}>
+                                    Building Admin
+                                </option>
+                                <option value="company_admin" {{ ($selectedRole ?? '') == 'company_admin' ? 'selected' : '' }}>
+                                    Company Admin
+                                </option>
+                                <option value="employee" {{ ($selectedRole ?? '') == 'employee' ? 'selected' : '' }}>
+                                    Employee
+                                </option>
+                                <option value="visitor" {{ ($selectedRole ?? '') == 'visitor' ? 'selected' : '' }}>
+                                    Visitor
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="d-grid gap-2 w-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ti ti-search me-1"></i>Search
+                                </button>
+                                <a href="{{ route('user.list') }}" class="btn btn-outline-secondary">
+                                    <i class="ti ti-refresh me-1"></i>Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Summary -->
+            @if(isset($searchName) || isset($selectedCompany) || isset($selectedRole))
+                <div class="alert alert-info mb-3">
+                    <i class="ti ti-info-circle me-2"></i>
+                    <strong>Search Results:</strong>
+                    @if(isset($searchName) && $searchName)
+                        <span class="badge bg-primary me-2">Name: {{ $searchName }}</span>
+                    @endif
+                    @if(isset($selectedCompany) && $selectedCompany)
+                        <span class="badge bg-success me-2">Company: {{ $companies->find($selectedCompany)->name ?? 'Not specified' }}</span>
+                    @endif
+                    @if(isset($selectedRole) && $selectedRole)
+                        <span class="badge bg-warning me-2">Role: {{ ucfirst(str_replace('_', ' ', $selectedRole)) }}</span>
+                    @endif
+                    <span class="badge bg-info">Results: {{ $users->count() }}</span>
+                </div>
+            @endif
+
+            <!-- Add User Button -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Users List</h5>
+                <a href="{{ route('user.add') }}" class="btn btn-success">
+                    <i class="ti ti-plus me-1"></i>Add New User
+                </a>
+            </div>
+
             <table class="table table-bordered table-striped">
                 <thead class="thead-dark">
                     <tr>
@@ -45,7 +133,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($users as $user)
+                    @forelse($users as $user)
                     <tr>
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->name }}</td>
@@ -109,7 +197,22 @@
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="10" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="ti ti-users-off" style="font-size: 3rem;"></i>
+                                <h5 class="mt-2">No Results Found</h5>
+                                <p>No users found matching the specified search criteria.</p>
+                                @if(isset($searchName) || isset($selectedCompany) || isset($selectedRole))
+                                    <a href="{{ route('user.list') }}" class="btn btn-outline-primary">
+                                        <i class="ti ti-refresh me-1"></i>Show All Users
+                                    </a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

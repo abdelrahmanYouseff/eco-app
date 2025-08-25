@@ -45,7 +45,12 @@ Route::get('/visitors/by-user-company/{userId}', [VisitorController::class, 'get
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/maintenance-requests', [MaintenanceRequestController::class, 'store']);
     Route::get('/maintenance-requests', [MaintenanceRequestController::class, 'index']);
+    Route::get('/maintenance-requests/all', [MaintenanceRequestController::class, 'getAllRequests']);
+    Route::put('/maintenance-requests/{id}/status', [MaintenanceRequestController::class, 'updateStatus']);
 });
+
+// Test route without authentication (for testing purposes)
+Route::post('/test-maintenance-request', [MaintenanceRequestController::class, 'testStore']);
 
 // Webhook routes
 Route::post('/webhook', [WebhookController::class, 'receive']);

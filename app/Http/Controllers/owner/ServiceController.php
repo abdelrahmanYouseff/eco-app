@@ -37,7 +37,7 @@ class ServiceController extends Controller
 
 
     public function requestView(){
-        $serviceRequest = MaintenanceRequest::all();
+        $serviceRequest = MaintenanceRequest::with('requestedBy')->orderBy('created_at', 'desc')->get();
 
         return view('owner.services.request', compact('serviceRequest'));
     }
