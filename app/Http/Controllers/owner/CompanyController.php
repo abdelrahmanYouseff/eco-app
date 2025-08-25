@@ -17,7 +17,6 @@ class CompanyController extends Controller
 
     public function addCompanyView(){
         $users = User::where('role', 'building_admin')->get();
-        dd($users);
         $buildings = Building::all(['id', 'name']);
         return view('owner.company.add_new_company', compact('users', 'buildings'));
     }
