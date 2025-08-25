@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/company/add', [CompanyController::class, 'addCompanyView'])->name('company.add');
     Route::get('/company/list', [CompanyController::class, 'CompanyList'])->name('company.list');
     Route::post('/companies/store', [CompanyController::class, 'store'])->name('companies.store');
+    Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
 
 
     Route::get('/user/add', [UserController::class, 'addNewUserView'])->name('user.add');

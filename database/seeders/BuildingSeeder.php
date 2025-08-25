@@ -18,11 +18,21 @@ class BuildingSeeder extends Seeder
             [
                 'id' => 1,
                 'name' => 'ECO',
-                'owner_id' => 1,
+                'address' => 'Main Street, Downtown',
+                'phone' => '+1234567890',
+                'description' => 'Main ECO building',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-
+            [
+                'id' => 2,
+                'name' => 'ECO Properties',
+                'address' => 'Business District, City Center',
+                'phone' => '+1234567891',
+                'description' => 'ECO Properties building for real estate services',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }
