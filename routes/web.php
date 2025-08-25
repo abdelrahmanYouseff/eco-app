@@ -72,3 +72,8 @@ Route::get('/privacy', function () {
 
 // Webhook Routes
 Route::get('/webhook/requests', [WebhookController::class, 'show'])->name('webhook.requests');
+
+// Maintenance Request Route
+Route::get('/services/request', function () {
+    return view('maintenance.request');
+})->name('maintenance.request');
