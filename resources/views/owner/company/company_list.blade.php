@@ -1,6 +1,19 @@
 @extends('master')
 @section('content')
 <div class="container mt-4">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="row">
         <div class="col-md-10 ms-auto">
             <h2 class="mb-4">Company List</h2>
@@ -33,6 +46,11 @@
                         <td>{{ $company->created_at ? $company->created_at->format('Y-m-d H:i') : 'N/A' }}</td>
                         <td>
                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                            <form action="{{ route('company.destroy', $company->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف الشركة {{ $company->name }}؟')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach

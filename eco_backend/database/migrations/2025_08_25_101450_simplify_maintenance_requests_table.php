@@ -14,11 +14,7 @@ return new class extends Migration
         Schema::table('maintenance_requests', function (Blueprint $table) {
             // إضافة عمود company_name
             $table->string('company_name')->after('id');
-<<<<<<< HEAD
             
-=======
-
->>>>>>> 4edcf35fad153bbab6963b9c8b9e5cd3cc64b435
             // إزالة الأعمدة غير المطلوبة
             $table->dropForeign(['company_id']);
             $table->dropColumn(['company_id', 'category_id', 'priority']);
@@ -35,17 +31,10 @@ return new class extends Migration
             $table->unsignedBigInteger('company_id')->after('id');
             $table->unsignedBigInteger('category_id')->after('company_id');
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium')->after('status');
-<<<<<<< HEAD
             
             // إزالة عمود company_name
             $table->dropColumn('company_name');
             
-=======
-
-            // إزالة عمود company_name
-            $table->dropColumn('company_name');
-
->>>>>>> 4edcf35fad153bbab6963b9c8b9e5cd3cc64b435
             // إعادة العلاقات
             $table->foreign('company_id')->references('id')->on('companies');
         });
