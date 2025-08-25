@@ -1,0 +1,81 @@
+{
+	"info": {
+		"_postman_id": "maintenance-api-collection",
+		"name": "Maintenance Requests API",
+		"description": "API لتسجيل وإدارة طلبات الصيانة",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "إرسال طلب صيانة جديد",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"service_name\": \"صيانة مكيف الهواء\",\n    \"description\": \"المكيف لا يعمل بشكل صحيح ويحتاج إلى صيانة عاجلة\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/maintenance-requests",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"maintenance-requests"
+					]
+				},
+				"description": "إرسال طلب صيانة جديد مع service_name و description"
+			},
+			"response": []
+		},
+		{
+			"name": "جلب طلبات الصيانة",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/maintenance-requests",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"maintenance-requests"
+					]
+				},
+				"description": "جلب جميع طلبات الصيانة للمستخدم الحالي"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "YOUR_BEARER_TOKEN_HERE",
+			"type": "string"
+		}
+	]
+}
