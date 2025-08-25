@@ -56,7 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/add/new-service', [ServiceController::class, 'addNewServiceView'])->name('service.view');
     Route::post('/services/store', [ServiceController::class, 'store'])->name('services.store');
     Route::delete('/services/{id}', [ServiceController::class, 'destroy'])->name('services.destroy');
-    Route::get('/services/request', [ServiceController::class, 'requestView'])->name('request.view');
+    Route::get('/services/request', [ServiceController::class, 'requestView'])->name('maintenance.request');
     Route::get('/event/view', [EventController::class, 'eventView'])->name('event.view');
     Route::post('/announcements/store', [EventController::class, 'store'])->name('event.store');
 
@@ -74,7 +74,4 @@ Route::get('/privacy', function () {
 // Webhook Routes
 Route::get('/webhook/requests', [WebhookController::class, 'show'])->name('webhook.requests');
 
-// Maintenance Request Route
-Route::get('/services/request', function () {
-    return view('maintenance.request');
-})->name('maintenance.request');
+

@@ -99,7 +99,7 @@
             </ul>
           </li>
           <li class="pc-item">
-            <a href="{{ route('request.view') }}" class="pc-link">
+            <a href="{{ route('maintenance.request') }}" class="pc-link">
               <span class="pc-micon"><i class="ti ti-brand-chrome"></i></span>
               <span class="pc-mtext">Requests</span>
             </a>
