@@ -11,29 +11,15 @@ class MaintenanceRequest extends Model
 
     protected $fillable = [
         'title',
-        'company_id',
+        'company_name',
         'requested_by',
-        'category_id',
         'description',
         'status',
-        'priority',
     ];
-
-    // علاقة الطلب بالشركة
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
-    }
 
     // علاقة الطلب بالمستخدم
     public function requestedBy()
     {
         return $this->belongsTo(User::class, 'requested_by');
-    }
-
-    // علاقة الطلب بفئة الصيانة
-    public function category()
-    {
-        return $this->belongsTo(MaintenanceCategory::class);
     }
 }

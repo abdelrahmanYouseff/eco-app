@@ -35,20 +35,13 @@ class MaintenanceRequestController extends Controller
             ], 400);
         }
 
-        // البحث عن فئة الصيانة أو إنشاؤها إذا لم تكن موجودة
-        $category = MaintenanceCategory::firstOrCreate([
-            'name' => $validated['service_name']
-        ]);
-
         // إنشاء طلب الصيانة
         $maintenanceRequest = MaintenanceRequest::create([
             'title' => $validated['service_name'], // استخدام service_name كعنوان
-            'company_id' => Auth::user()->company_id,
+            'company_name' => Auth::user()->company ? Auth::user()->company->name : 'غير محدد',
             'requested_by' => Auth::id(),
-            'category_id' => $category->id,
             'description' => $validated['description'],
             'status' => 'pending',
-            'priority' => 'medium', // تعيين أولوية افتراضية
         ]);
 
         return response()->json([
@@ -56,12 +49,12 @@ class MaintenanceRequestController extends Controller
             'message' => 'تم إرسال طلب الصيانة بنجاح',
             'data' => [
                 'id' => $maintenanceRequest->id,
-                'service_name' => $category->name,
+                'service_name' => $maintenanceRequest->title,
                 'description' => $maintenanceRequest->description,
                 'status' => $maintenanceRequest->status,
                 'created_at' => $maintenanceRequest->created_at,
                 'requested_by' => Auth::user()->name,
-                'company_name' => Auth::user()->company->name ?? 'غير محدد'
+                'company_name' => $maintenanceRequest->company_name
             ]
         ], 201);
     }
@@ -79,7 +72,6 @@ class MaintenanceRequestController extends Controller
         }
 
         $requests = MaintenanceRequest::where('requested_by', Auth::id())
-            ->with(['category', 'company'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -88,11 +80,11 @@ class MaintenanceRequestController extends Controller
             'data' => $requests->map(function ($request) {
                 return [
                     'id' => $request->id,
-                    'service_name' => $request->category->name,
+                    'service_name' => $request->title,
                     'description' => $request->description,
                     'status' => $request->status,
                     'created_at' => $request->created_at,
-                    'company_name' => $request->company->name ?? 'غير محدد'
+                    'company_name' => $request->company_name
                 ];
             })
         ]);
