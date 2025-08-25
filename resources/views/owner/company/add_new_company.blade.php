@@ -44,33 +44,13 @@
           <input type="text" name="office_number" id="office_number" class="form-control" placeholder="Enter office number" required>
         </div>
 
-        <div class="mb-3">
+                <div class="mb-3">
           <label for="admin_user_id" class="form-label">Admin</label>
-
-          <!-- Debug Info -->
-          <div style="background: #f8f9fa; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-            <strong>Debug Info:</strong><br>
-            Users Count: {{ $users->count() }}<br>
-            Users Variable: {{ var_dump($users) }}<br>
-            @if($users->count() > 0)
-              Users Found:<br>
-              @foreach($users as $user)
-                - {{ $user->name }} ({{ $user->email }}) - Role: {{ $user->role }}<br>
-              @endforeach
-            @else
-              No users found!
-            @endif
-          </div>
-
           <select name="admin_user_id" id="admin_user_id" class="form-select" required>
             <option value="">Choose Admin</option>
-            @if($users->count() > 0)
-              @foreach($users as $user)
-                <option value="{{ $user->id }}">{{ $user->name }}</option>
-              @endforeach
-            @else
-              <option value="" disabled>No building_admin users found</option>
-            @endif
+            @foreach($users as $user)
+              <option value="{{ $user->id }}">{{ $user->name }}</option>
+            @endforeach
           </select>
         </div>
 
