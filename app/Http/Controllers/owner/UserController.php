@@ -82,4 +82,33 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Error deleting user: ' . $e->getMessage());
         }
     }
+
+    public function changePassword(Request $request, $id)
+    {
+        try {
+            // التحقق من أن المستخدم الحالي هو building admin
+            if (auth()->user()->role !== 'building_admin') {
+                return redirect()->back()->with('error', 'غير مصرح لك بتغيير كلمات المرور.');
+            }
+
+            // منع المستخدم من تغيير كلمة مروره الخاصة من خلال هذه الواجهة
+            if (auth()->id() == $id) {
+                return redirect()->back()->with('error', 'لا يمكنك تغيير كلمة مرورك الخاصة من خلال هذه الواجهة.');
+            }
+
+            $request->validate([
+                'new_password' => 'required|string|min:6|confirmed',
+                'new_password_confirmation' => 'required|string|min:6',
+            ]);
+
+            $user = User::findOrFail($id);
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return redirect()->back()->with('success', "تم تغيير كلمة المرور للمستخدم '{$user->name}' بنجاح.");
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'خطأ في تغيير كلمة المرور: ' . $e->getMessage());
+        }
+    }
 }

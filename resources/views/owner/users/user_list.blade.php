@@ -95,6 +95,12 @@
                                     <i class="ti ti-copy"></i>
                                 </button>
                                 @if(auth()->id() != $user->id)
+                                <button type="button" class="btn btn-sm btn-outline-warning"
+                                        onclick="changePassword({{ $user->id }}, '{{ $user->name }}')" title="تغيير كلمة المرور">
+                                    <i class="ti ti-lock"></i>
+                                </button>
+                                @endif
+                                @if(auth()->id() != $user->id)
                                 <button type="button" class="btn btn-sm btn-outline-danger"
                                         onclick="deleteUser({{ $user->id }}, '{{ $user->name }}')" title="Delete User">
                                     <i class="ti ti-trash"></i>
@@ -128,6 +134,44 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" onclick="downloadQRCode()">Download</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Change Modal -->
+<div class="modal fade" id="passwordChangeModal" tabindex="-1" aria-labelledby="passwordChangeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordChangeModalLabel">
+                    <i class="ti ti-lock me-2"></i>تغيير كلمة المرور
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="passwordChangeForm" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">اسم المستخدم</label>
+                        <input type="text" class="form-control" id="userName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">كلمة المرور الجديدة</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                        <div class="form-text">يجب أن تكون كلمة المرور 6 أحرف على الأقل</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password_confirmation" class="form-label">تأكيد كلمة المرور الجديدة</label>
+                        <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" required minlength="6">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="ti ti-lock me-1"></i>تغيير كلمة المرور
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -237,5 +281,47 @@ function deleteUser(userId, userName) {
         }
     });
 }
+
+function changePassword(userId, userName) {
+    // تعيين اسم المستخدم في Modal
+    document.getElementById('userName').value = userName;
+
+    // تعيين action للform
+    document.getElementById('passwordChangeForm').action = `/users/${userId}/change-password`;
+
+    // عرض Modal
+    new bootstrap.Modal(document.getElementById('passwordChangeModal')).show();
+}
+
+// معالجة تقديم form تغيير كلمة المرور
+document.getElementById('passwordChangeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = document.getElementById('new_password_confirmation').value;
+
+    if (newPassword !== confirmPassword) {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ في كلمة المرور',
+            text: 'كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقين.',
+            confirmButtonText: 'حسناً'
+        });
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        Swal.fire({
+            icon: 'error',
+            title: 'كلمة المرور قصيرة جداً',
+            text: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل.',
+            confirmButtonText: 'حسناً'
+        });
+        return;
+    }
+
+    // إرسال form
+    this.submit();
+});
 </script>
 @endpush

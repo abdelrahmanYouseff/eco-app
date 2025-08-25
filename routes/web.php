@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/list', [UserController::class, 'userList'])->name('user.list');
     Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{id}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
 
     // Gates Routes
     Route::get('/gates/access-logs', [GatesController::class, 'accessLogs'])->name('gates.access.logs');
