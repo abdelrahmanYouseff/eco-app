@@ -17,18 +17,38 @@ class MaintenanceRequestController extends Controller
             'description' => 'required|string',
         ]);
 
-        // البحث عن فئة الصيانة أو إنشاؤها إذا لم تكن موجودة
+        // Check if user is authenticated
+        if (!Auth::user()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'يجب تسجيل الدخول لإرسال طلب صيانة',
+                'error' => 'Authentication required to submit maintenance requests'
+            ], 401);
+        }
+
+        // Check if user has a company_id
+        if (!Auth::user()->company_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'المستخدم يجب أن يكون مرتبط بشركة لإرسال طلب صيانة',
+                'error' => 'User must be associated with a company to submit maintenance requests'
+            ], 400);
+        }
+
+        // Search for maintenance category or create it if it doesn't exist
         $category = MaintenanceCategory::firstOrCreate([
             'name' => $validated['service_name']
         ]);
 
-        // إنشاء طلب الصيانة
+        // Create maintenance request
         $maintenanceRequest = MaintenanceRequest::create([
-            'company_id' => Auth::user()->company_id, // استخدام company_id للمستخدم المسجل دخوله
-            'requested_by' => Auth::id(), // استخدام ID المستخدم المسجل دخوله
+            'title' => $validated['service_name'], // Use service_name as title
+            'company_id' => Auth::user()->company_id,
+            'requested_by' => Auth::id(),
             'category_id' => $category->id,
             'description' => $validated['description'],
-            'status' => 'pending', // تلقائيًا
+            'status' => 'pending',
+            'priority' => 'medium', // Set default priority
         ]);
 
         return response()->json([
@@ -46,9 +66,18 @@ class MaintenanceRequestController extends Controller
         ], 201);
     }
 
-    // دالة لجلب طلبات الصيانة للمستخدم الحالي
+    // Function to get maintenance requests for current user
     public function index()
     {
+        // Check if user is authenticated
+        if (!Auth::user()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'يجب تسجيل الدخول لعرض طلبات الصيانة',
+                'error' => 'Authentication required to view maintenance requests'
+            ], 401);
+        }
+
         $requests = MaintenanceRequest::where('requested_by', Auth::id())
             ->with(['category', 'company'])
             ->orderBy('created_at', 'desc')

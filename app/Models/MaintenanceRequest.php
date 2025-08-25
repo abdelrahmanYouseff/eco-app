@@ -10,11 +10,13 @@ class MaintenanceRequest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'title',
         'company_id',
         'requested_by',
         'category_id',
         'description',
         'status',
+        'priority',
     ];
 
     // علاقة الطلب بالشركة

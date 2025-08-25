@@ -40,8 +40,12 @@ Route::post('/gate', [GateController::class, 'gate']);
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::post('/visitors', [VisitorController::class, 'store']);
 Route::get('/visitors/by-user-company/{userId}', [VisitorController::class, 'getVisitorsByUserCompany']);
-Route::post('/maintenance-requests', [MaintenanceRequestController::class, 'store']);
-Route::get('/maintenance-requests', [MaintenanceRequestController::class, 'index']);
+
+// Maintenance requests - require authentication
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/maintenance-requests', [MaintenanceRequestController::class, 'store']);
+    Route::get('/maintenance-requests', [MaintenanceRequestController::class, 'index']);
+});
 
 // Webhook routes
 Route::post('/webhook', [WebhookController::class, 'receive']);
