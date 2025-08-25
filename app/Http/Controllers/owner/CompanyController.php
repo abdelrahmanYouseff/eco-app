@@ -16,7 +16,8 @@ class CompanyController extends Controller
     }
 
     public function addCompanyView(){
-        $users = User::where('role', 'company_admin')->get();
+        $users = User::where('role', 'building_admin')->get();
+        dd($users);
         $buildings = Building::all(['id', 'name']);
         return view('owner.company.add_new_company', compact('users', 'buildings'));
     }
@@ -50,24 +51,24 @@ class CompanyController extends Controller
     {
         try {
             $company = Company::findOrFail($id);
-            
+
             // التحقق من وجود مستخدمين مرتبطين بالشركة
             $usersCount = User::where('company_id', $id)->count();
             if ($usersCount > 0) {
                 return redirect()->back()->with('error', 'لا يمكن حذف الشركة لأنها تحتوي على مستخدمين مرتبطين بها. يرجى حذف المستخدمين أولاً.');
             }
-            
+
             // التحقق من وجود طلبات صيانة مرتبطة بالشركة
             $maintenanceRequestsCount = \App\Models\MaintenanceRequest::where('company_id', $id)->count();
             if ($maintenanceRequestsCount > 0) {
                 return redirect()->back()->with('error', 'لا يمكن حذف الشركة لأنها تحتوي على طلبات صيانة مرتبطة بها. يرجى حذف طلبات الصيانة أولاً.');
             }
-            
+
             $companyName = $company->name;
             $company->delete();
-            
+
             return redirect()->back()->with('success', "تم حذف الشركة '{$companyName}' بنجاح.");
-            
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'خطأ في حذف الشركة: ' . $e->getMessage());
         }
