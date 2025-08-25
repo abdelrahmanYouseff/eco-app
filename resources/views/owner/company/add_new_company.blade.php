@@ -46,12 +46,21 @@
 
         <div class="mb-3">
           <label for="admin_user_id" class="form-label">Admin</label>
+          <!-- Debug: Show users count -->
+          <p class="text-muted">Debug: Found {{ $users->count() }} building_admin users</p>
           <select name="admin_user_id" id="admin_user_id" class="form-select" required>
             <option value="">Choose</option>
             @foreach($users as $user)
-              <option value="{{ $user->id }}">{{ $user->name }}</option>
+              <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
             @endforeach
           </select>
+          <!-- Debug: Show all users -->
+          <div class="mt-2">
+            <small class="text-muted">Available users:</small>
+            @foreach($users as $user)
+              <br><small>{{ $user->name }} ({{ $user->email }}) - Role: {{ $user->role }}</small>
+            @endforeach
+          </div>
         </div>
 
         <div class="mb-3">
