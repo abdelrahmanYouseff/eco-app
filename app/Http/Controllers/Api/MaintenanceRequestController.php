@@ -17,7 +17,7 @@ class MaintenanceRequestController extends Controller
             'description' => 'required|string',
         ]);
 
-        // Check if user is authenticated
+        // التحقق من أن المستخدم مسجل دخوله
         if (!Auth::user()) {
             return response()->json([
                 'status' => false,
@@ -26,7 +26,7 @@ class MaintenanceRequestController extends Controller
             ], 401);
         }
 
-        // Check if user has a company_id
+        // التحقق من أن المستخدم مرتبط بشركة
         if (!Auth::user()->company_id) {
             return response()->json([
                 'status' => false,
@@ -35,20 +35,20 @@ class MaintenanceRequestController extends Controller
             ], 400);
         }
 
-        // Search for maintenance category or create it if it doesn't exist
+        // البحث عن فئة الصيانة أو إنشاؤها إذا لم تكن موجودة
         $category = MaintenanceCategory::firstOrCreate([
             'name' => $validated['service_name']
         ]);
 
-        // Create maintenance request
+        // إنشاء طلب الصيانة
         $maintenanceRequest = MaintenanceRequest::create([
-            'title' => $validated['service_name'], // Use service_name as title
+            'title' => $validated['service_name'], // استخدام service_name كعنوان
             'company_id' => Auth::user()->company_id,
             'requested_by' => Auth::id(),
             'category_id' => $category->id,
             'description' => $validated['description'],
             'status' => 'pending',
-            'priority' => 'medium', // Set default priority
+            'priority' => 'medium', // تعيين أولوية افتراضية
         ]);
 
         return response()->json([
@@ -66,10 +66,10 @@ class MaintenanceRequestController extends Controller
         ], 201);
     }
 
-    // Function to get maintenance requests for current user
+    // دالة لجلب طلبات الصيانة للمستخدم الحالي
     public function index()
     {
-        // Check if user is authenticated
+        // التحقق من أن المستخدم مسجل دخوله
         if (!Auth::user()) {
             return response()->json([
                 'status' => false,
