@@ -11,6 +11,9 @@ class Building extends Model
 
     protected $fillable = [
         'name',
+        'address',
+        'phone',
+        'description',
         'owner_id',
         'units_count',
         'floors_count',

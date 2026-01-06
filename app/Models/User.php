@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Notifications\Notifiable;class User extends Authenticatable
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
+
+class User extends Authenticatable
 {
     use HasFactory, HasApiTokens, Notifiable;
 
@@ -20,6 +23,17 @@ use Illuminate\Notifications\Notifiable;class User extends Authenticatable
         'badge_id',
         'is_inside',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->badge_id)) {
+                $user->badge_id = Str::uuid();
+            }
+        });
+    }
 
     // علاقة المستخدم بالشركة
     public function company()
