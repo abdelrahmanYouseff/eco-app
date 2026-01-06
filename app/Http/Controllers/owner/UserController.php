@@ -55,5 +55,31 @@ class UserController extends Controller
     return redirect()->back()->with('success', 'User added successfully.');
 }
 
+    public function destroy($id)
+    {
+        try {
+            $user = User::findOrFail($id);
 
+            // منع حذف المستخدم إذا كان هو نفسه (building admin)
+            if (auth()->id() == $id) {
+                return redirect()->back()->with('error', 'You cannot delete your own account.');
+            }
+
+            // منع حذف آخر building admin
+            if ($user->role === 'building_admin' || $user->role === 'accountant') {
+                $buildingAdminsCount = User::where('role', 'building_admin')->count();
+                if ($buildingAdminsCount <= 1) {
+                    return redirect()->back()->with('error', 'Cannot delete the last building admin.');
+                }
+            }
+
+            $userName = $user->name;
+            $user->delete();
+
+            return redirect()->back()->with('success', "User '{$userName}' has been deleted successfully.");
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error deleting user: ' . $e->getMessage());
+        }
+    }
 }

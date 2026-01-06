@@ -48,7 +48,7 @@ class LoginController extends Controller
     protected function redirectByRole(string $role)
     {
         return match ($role) {
-            'building_admin' => redirect()->route('building.owner.dashboard'),
+            'building_admin', 'accountant' => redirect()->route('building.owner.dashboard'),
             'company_admin' => redirect()->route('building.admin.dashboard'),
             'employee'      => redirect()->route('employee.dashboard'),
             'visitor'       => redirect()->route('visitor.dashboard'),

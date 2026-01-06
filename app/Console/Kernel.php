@@ -12,7 +12,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Generate payment due notifications daily
+        $schedule->command('notifications:generate-payment-due')
+            ->daily()
+            ->at('08:00');
     }
 
     /**

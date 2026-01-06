@@ -28,17 +28,21 @@ class CompanyController extends Controller
 {
     $validated = $request->validate([
         'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:companies,email',
+        'phone' => 'required|string|max:20',
         'floor_number' => 'required|string|max:10',
         'office_number' => 'required|string|max:10',
         'admin_user_id' => 'required|exists:users,id',
-        'building_id' => 'required|string|max:50',
+        'building_id' => 'required|exists:buildings,id',
     ]);
 
     Company::create([
         'name' => $validated['name'],
+        'email' => $validated['email'],
+        'phone' => $validated['phone'],
         'floor_number' => $validated['floor_number'],
         'office_number' => $validated['office_number'],
-'admin_user_id' => $validated['admin_user_id'],
+        'admin_user_id' => $validated['admin_user_id'],
         'building_id' => $validated['building_id'],
     ]);
 
