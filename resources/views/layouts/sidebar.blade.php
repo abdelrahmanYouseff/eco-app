@@ -177,12 +177,14 @@
                 </li>
               </ul>
             </li>
+            @if(Route::has('request.view'))
             <li class="pc-item">
               <a href="{{ route('request.view') }}" class="pc-link">
                 <span class="pc-micon"><i class="ti ti-brand-chrome"></i></span>
                 <span class="pc-mtext">الطلبات</span>
               </a>
             </li>
+            @endif
 
             <li class="pc-item pc-caption">
               <label>الأحداث</label>
