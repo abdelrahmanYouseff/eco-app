@@ -50,3 +50,4 @@ class SettingsController extends Controller
     }
 }
 
+

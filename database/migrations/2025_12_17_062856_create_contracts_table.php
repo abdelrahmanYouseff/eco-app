@@ -33,9 +33,16 @@ return new class extends Migration
             $table->decimal('vat_amount', 15, 2)->default(0);
             $table->decimal('general_services_amount', 15, 2)->default(0);
             $table->string('insurance_policy_number')->nullable();
-            $table->foreignId('broker_id')->nullable()->constrained('brokers')->onDelete('set null');
+            $table->unsignedBigInteger('broker_id')->nullable();
             $table->timestamps();
         });
+        
+        // Add foreign key constraint only if brokers table exists
+        if (Schema::hasTable('brokers')) {
+            Schema::table('contracts', function (Blueprint $table) {
+                $table->foreign('broker_id')->references('id')->on('brokers')->onDelete('set null');
+            });
+        }
     }
 
     /**
