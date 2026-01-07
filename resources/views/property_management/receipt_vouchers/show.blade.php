@@ -87,7 +87,7 @@
                                     @endif
                                     <tr>
                                         <th>تاريخ الإنشاء:</th>
-                                        <td>{{ $receiptVoucher->created_at->format('Y-m-d H:i') }}</td>
+                                        <td>{{ $receiptVoucher->created_at ? $receiptVoucher->created_at->format('Y-m-d H:i') : 'غير محدد' }}</td>
                                     </tr>
                                 </table>
                             </div>

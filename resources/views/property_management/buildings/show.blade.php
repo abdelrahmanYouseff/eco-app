@@ -41,11 +41,11 @@
                             @endif
                             <tr>
                                 <th>تاريخ الإنشاء:</th>
-                                <td>{{ $building->created_at->format('Y-m-d H:i') }}</td>
+                                <td>{{ $building->created_at ? $building->created_at->format('Y-m-d H:i') : 'غير محدد' }}</td>
                             </tr>
                             <tr>
                                 <th>آخر تحديث:</th>
-                                <td>{{ $building->updated_at->format('Y-m-d H:i') }}</td>
+                                <td>{{ $building->updated_at ? $building->updated_at->format('Y-m-d H:i') : 'غير محدد' }}</td>
                             </tr>
                         </table>
                         

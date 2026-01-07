@@ -66,7 +66,7 @@
                                         <td class="text-center align-middle">
                                             <span class="badge bg-secondary">{{ $building->units_count ?? 0 }} وحدة</span>
                                         </td>
-                                        <td class="text-center align-middle">{{ $building->created_at->format('Y-m-d') }}</td>
+                                        <td class="text-center align-middle">{{ $building->created_at ? $building->created_at->format('Y-m-d') : 'غير محدد' }}</td>
                                         <td class="text-center align-middle">
                                             <div class="d-flex justify-content-center gap-2">
                                                 <a href="{{ route('property-management.buildings.show', $building->id) }}" 
