@@ -126,6 +126,12 @@
             </a>
           </li>
           <li class="pc-item">
+            <a href="{{ route('property-management.tenants.account-statements') }}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-report"></i></span>
+              <span class="pc-mtext">كشف حساب العملاء</span>
+            </a>
+          </li>
+          <li class="pc-item">
             <a href="{{ route('property-management.brokers.index') }}" class="pc-link">
               <span class="pc-micon"><i class="ti ti-user-check"></i></span>
               <span class="pc-mtext">الوسطاء / الوكلاء</span>
