@@ -4,6 +4,7 @@ namespace App\PropertyManagement\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\PropertyManagement\Models\Contract;
+use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Services\Payments\PaymentService;
 use Illuminate\Http\Request;
 
@@ -32,6 +33,18 @@ class PaymentController extends Controller
         $payments = $this->paymentService->getContractPayments($contractId);
         
         return view('property_management.payments.contract', compact('contract', 'payments'));
+    }
+
+    public function requestPayment($paymentId)
+    {
+        $payment = RentPayment::with([
+            'contract.client', 
+            'contract.unit', 
+            'contract.building',
+            'contract.broker'
+        ])->findOrFail($paymentId);
+        
+        return view('property_management.payments.request_payment', compact('payment'));
     }
 }
 

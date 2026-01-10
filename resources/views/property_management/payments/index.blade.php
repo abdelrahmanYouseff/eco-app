@@ -67,9 +67,16 @@
                                         </td>
                                         <td>{{ $payment->payment_date ? $payment->payment_date->format('Y-m-d') : 'غير متوفر' }}</td>
                                         <td>
-                                            <a href="{{ route('property-management.payments.contract', $payment->contract_id) }}" class="btn btn-sm btn-info">
-                                                <i class="ti ti-eye"></i> عرض العقد
-                                            </a>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ route('property-management.payments.contract', $payment->contract_id) }}" class="btn btn-sm btn-outline-dark">
+                                                    <i class="ti ti-eye"></i> عرض العقد
+                                                </a>
+                                                @if($payment->status !== 'paid')
+                                                <a href="{{ route('property-management.payments.request-payment', $payment->id) }}" class="btn btn-sm btn-dark" title="إرسال مطالبة">
+                                                    <i class="ti ti-mail"></i> مطالبة
+                                                </a>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                     @empty
