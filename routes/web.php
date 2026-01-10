@@ -117,6 +117,12 @@ Route::middleware('auth')->group(function () {
 
         // Accounting
         Route::get('/accounting', [\App\PropertyManagement\Http\Controllers\Web\AccountingController::class, 'index'])->name('accounting.index');
+        Route::get('/accounting/revenues', [\App\PropertyManagement\Http\Controllers\Web\AccountingController::class, 'revenues'])->name('accounting.revenues');
+        Route::get('/accounting/revenues/export', [\App\PropertyManagement\Http\Controllers\Web\AccountingController::class, 'exportRevenues'])->name('accounting.revenues.export');
+        Route::get('/accounting/pending', [\App\PropertyManagement\Http\Controllers\Web\AccountingController::class, 'pending'])->name('accounting.pending');
+        Route::get('/accounting/pending/export', [\App\PropertyManagement\Http\Controllers\Web\AccountingController::class, 'exportPending'])->name('accounting.pending.export');
+        Route::get('/accounting/invoices', [\App\PropertyManagement\Http\Controllers\Web\AccountingController::class, 'invoices'])->name('accounting.invoices');
+        Route::get('/accounting/invoices/export', [\App\PropertyManagement\Http\Controllers\Web\AccountingController::class, 'exportInvoices'])->name('accounting.invoices.export');
 
         // Brokers
         Route::get('/brokers', [\App\PropertyManagement\Http\Controllers\Web\BrokerController::class, 'index'])->name('brokers.index');

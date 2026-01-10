@@ -84,7 +84,8 @@
                                 <h5 class="mb-3">ملخص الحساب</h5>
                                 <table class="table table-borderless">
                                     @php
-                                        $totalDebit = collect($transactions)->sum('debit');
+                                        // إجمالي المدين = total_rent من العقود (ليس مجموع debit من transactions)
+                                        $totalDebit = isset($totalAmountDue) ? $totalAmountDue : collect($transactions)->where('type', 'total_due')->sum('debit');
                                         $totalCredit = collect($transactions)->sum('credit');
                                         $currentBalance = count($transactions) > 0 ? end($transactions)['balance'] : 0;
                                     @endphp
@@ -178,14 +179,15 @@
                                 </tbody>
                                 <tfoot class="table-light">
                                     @php
-                                        $totalDebit = collect($transactions)->sum('debit');
-                                        $totalCredit = collect($transactions)->sum('credit');
+                                        // إجمالي المدين = total_rent من العقود (ليس مجموع debit لأن المتبقي جزء منه)
+                                        $totalDebitFooter = isset($totalAmountDue) ? $totalAmountDue : collect($transactions)->where('type', 'total_due')->sum('debit');
+                                        $totalCreditFooter = collect($transactions)->sum('credit');
                                         $finalBalance = count($transactions) > 0 ? end($transactions)['balance'] : 0;
                                     @endphp
                                     <tr>
                                         <th colspan="5" class="text-end">الإجمالي:</th>
-                                        <th class="text-end">{{ number_format($totalDebit, 2) }}</th>
-                                        <th class="text-end">{{ number_format($totalCredit, 2) }}</th>
+                                        <th class="text-end">{{ number_format($totalDebitFooter, 2) }}</th>
+                                        <th class="text-end">{{ number_format($totalCreditFooter, 2) }}</th>
                                         <th class="text-end">
                                             <strong>{{ number_format($finalBalance, 2) }}</strong>
                                         </th>

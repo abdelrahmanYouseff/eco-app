@@ -4,6 +4,7 @@ namespace App\PropertyManagement\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\PropertyManagement\Models\Client;
+use App\PropertyManagement\Models\Contract;
 use App\PropertyManagement\Models\Invoice;
 use App\PropertyManagement\Models\ReceiptVoucher;
 use App\PropertyManagement\Models\RentPayment;
@@ -112,7 +113,16 @@ class TenantController extends Controller
         if ($customerId) {
             $selectedCustomer = Client::findOrFail($customerId);
 
+            // Get all contracts for this customer (without date filter for total_rent calculation)
+            // إجمالي المدين = مجموع total_rent من جميع العقود للعميل
+            $contracts = Contract::where('client_id', $customerId)->get();
+
+            // Calculate total amount due from contracts (total_rent) - هذا هو إجمالي المدين
+            // إجمالي قيمة العقود = مجموع total_rent من جميع العقود
+            $totalAmountDue = $contracts->sum('total_rent');
+
             // Get ALL rent payments (paid and unpaid) for this customer, ordered by due_date
+            // These are for reference only (to show unpaid payments later)
             $allRentPayments = RentPayment::whereHas('contract', function($q) use ($customerId) {
                     $q->where('client_id', $customerId);
                 })
@@ -126,13 +136,6 @@ class TenantController extends Controller
                 ->orderBy('due_date', 'asc')
                 ->get();
 
-            // Calculate total amount due (sum of all rent payments)
-            $totalAmountDue = $allRentPayments->sum('total_value');
-            
-            // Get earliest payment date for the initial transaction
-            $earliestDate = $allRentPayments->min('issued_date') ?? $allRentPayments->min('due_date');
-            $earliestDueDate = $allRentPayments->min('due_date');
-
             // Get all receipt vouchers for this customer, ordered by date
             $allReceiptVouchers = ReceiptVoucher::where('client_id', $customerId)
                 ->with(['contract', 'rentPayment'])
@@ -144,6 +147,9 @@ class TenantController extends Controller
                 })
                 ->orderBy('receipt_date', 'asc')
                 ->get();
+            
+            // Get the last payment date to limit transactions up to that point
+            $lastPaymentDate = $allReceiptVouchers->max('receipt_date');
             
             // Create a map of rent payment IDs to due dates for quick lookup
             $rentPaymentDueDates = [];
@@ -167,14 +173,24 @@ class TenantController extends Controller
             $transactionNumber = 1;
             $runningBalance = $totalAmountDue;
 
-            // First row: Total amount due (المدين)
+            // Get earliest contract date for the initial transaction
+            $earliestDate = $contracts->min('start_date') ?? ($allRentPayments->min('issued_date') ?? $allRentPayments->min('due_date') ?? now());
+            $earliestDueDate = $allRentPayments->min('due_date') ?? $earliestDate;
+
+            // First row: Total amount due from contracts (المدين) - إجمالي قيمة العقود
             if ($totalAmountDue > 0) {
+                $contractsDescription = 'إجمالي قيمة العقود - ' . count($contracts) . ' عقد';
+                if (count($contracts) > 0) {
+                    $contractNumbers = $contracts->pluck('contract_number')->implode('، ');
+                    $contractsDescription .= ' (أرقام العقود: ' . $contractNumbers . ')';
+                }
+                
                 $transactions[] = [
                     'operation_number' => $transactionNumber++,
                     'reference_number' => 'إجمالي المستحقات',
-                    'date' => $earliestDate ?? now(),
+                    'date' => $earliestDate,
                     'due_date' => $earliestDueDate,
-                    'description' => 'إجمالي المستحقات على العميل - ' . count($allRentPayments) . ' دفعة',
+                    'description' => $contractsDescription,
                     'debit' => $totalAmountDue,
                     'credit' => 0,
                     'balance' => $runningBalance,
@@ -208,10 +224,16 @@ class TenantController extends Controller
                 ];
             }
 
-            // Add unpaid rent payments (المتبقي المستحق) - show as detail without changing balance
+            // Add unpaid rent payments (المتبقي المستحق) - show only up to last payment date
             // These are already included in the total, so we just show them for reference
             $unpaidPayments = [];
             foreach ($allRentPayments as $payment) {
+                // Only show payments that are due before or on the last payment date
+                // If no payments exist, show all unpaid payments
+                if ($lastPaymentDate && $payment->due_date > $lastPaymentDate) {
+                    continue; // Skip payments after last payment date
+                }
+                
                 $paidAmount = $rentPaymentPaidMap[$payment->id] ?? 0;
                 $remainingAmount = $payment->total_value - $paidAmount;
 
@@ -231,27 +253,34 @@ class TenantController extends Controller
             });
 
             // Add unpaid payments as detail rows (for information, balance stays the same)
+            // Only show payments up to the last payment date
             foreach ($unpaidPayments as $unpaid) {
                 $payment = $unpaid['payment'];
-                $transactions[] = [
-                    'operation_number' => $transactionNumber++,
-                    'reference_number' => 'دفعة إيجار #' . $payment->id . ' (متبقي)',
-                    'date' => $payment->issued_date ?? $payment->due_date,
-                    'due_date' => $payment->due_date,
-                    'description' => 'قسط إيجار مستحق (متبقي) - ' . ($payment->contract ? 'عقد رقم: ' . $payment->contract->contract_number : '') . ($unpaid['paid'] > 0 ? ' - مدفوع جزئياً: ' . number_format($unpaid['paid'], 2) . ' / ' . number_format($payment->total_value, 2) : ''),
-                    'debit' => $unpaid['remaining'],
-                    'credit' => 0,
-                    'balance' => $runningBalance, // Balance stays the same (already included in total)
-                    'type' => 'unpaid_rent',
-                    'id' => $payment->id,
-                ];
+                // Only add if payment due date is before or on last payment date
+                if (!$lastPaymentDate || $payment->due_date <= $lastPaymentDate) {
+                    $transactions[] = [
+                        'operation_number' => $transactionNumber++,
+                        'reference_number' => 'دفعة إيجار #' . $payment->id . ' (متبقي)',
+                        'date' => $payment->issued_date ?? $payment->due_date,
+                        'due_date' => $payment->due_date,
+                        'description' => 'قسط إيجار مستحق (متبقي) - ' . ($payment->contract ? 'عقد رقم: ' . $payment->contract->contract_number : '') . ($unpaid['paid'] > 0 ? ' - مدفوع جزئياً: ' . number_format($unpaid['paid'], 2) . ' / ' . number_format($payment->total_value, 2) : ''),
+                        'debit' => $unpaid['remaining'],
+                        'credit' => 0,
+                        'balance' => $runningBalance, // Balance stays the same (already included in total)
+                        'type' => 'unpaid_rent',
+                        'id' => $payment->id,
+                    ];
+                }
             }
+        } else {
+            $totalAmountDue = 0;
         }
 
         return view('property_management.tenants.customer_account_statements', [
             'customers' => $customers,
             'selectedCustomer' => $selectedCustomer,
             'transactions' => $transactions,
+            'totalAmountDue' => $totalAmountDue ?? 0, // إجمالي المدين من العقود (total_rent)
             'customerId' => $customerId,
             'fromDate' => $fromDate,
             'toDate' => $toDate,

@@ -46,38 +46,45 @@
         <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div class="bg-light rounded-circle p-3">
-                                    <i class="ti ti-currency-dollar text-dark" style="font-size: 24px;"></i>
+                <a href="{{ route('property-management.accounting.revenues', ['from_date' => $fromDate, 'to_date' => $toDate]) }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-light rounded-circle p-3">
+                                        <i class="ti ti-currency-dollar text-dark" style="font-size: 24px;"></i>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="text-muted mb-1" style="font-size: 0.875rem; font-weight: 500;">إجمالي الإيرادات</h6>
-                                <h4 class="mb-0 text-dark fw-bold">{{ number_format($totalRevenue, 2) }} <small class="text-muted" style="font-size: 0.875rem;">SAR</small></h4>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="text-muted mb-1" style="font-size: 0.875rem; font-weight: 500;">إجمالي الإيرادات</h6>
+                                    <h4 class="mb-0 text-dark fw-bold">
+                                        {{ number_format($totalRevenue, 2) }} <small class="text-muted" style="font-size: 0.875rem;">SAR</small>
+                                        <i class="ti ti-arrow-left ms-1" style="font-size: 0.875rem;"></i>
+                                    </h4>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div class="bg-light rounded-circle p-3">
-                                    <i class="ti ti-clock text-dark" style="font-size: 24px;"></i>
+                <a href="{{ route('property-management.accounting.pending', ['from_date' => $fromDate, 'to_date' => $toDate]) }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm text-dark" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-light rounded-circle p-3">
+                                        <i class="ti ti-clock text-dark" style="font-size: 24px;"></i>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="text-muted mb-1" style="font-size: 0.875rem; font-weight: 500;">المتبقي</h6>
-                                <h4 class="mb-0 text-dark fw-bold">{{ number_format($totalPending, 2) }} <small class="text-muted" style="font-size: 0.875rem;">SAR</small></h4>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="text-muted mb-1" style="font-size: 0.875rem; font-weight: 500;">المتبقي <i class="ti ti-arrow-left fs-6"></i></h6>
+                                    <h4 class="mb-0 text-dark fw-bold">{{ number_format($totalPending, 2) }} <small class="text-muted" style="font-size: 0.875rem;">SAR</small></h4>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-3">
                 <div class="card border-0 shadow-sm">
@@ -98,21 +105,23 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div class="bg-light rounded-circle p-3">
-                                    <i class="ti ti-file-invoice text-dark" style="font-size: 24px;"></i>
+                <a href="{{ route('property-management.accounting.invoices', ['from_date' => $fromDate, 'to_date' => $toDate]) }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm text-dark" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-light rounded-circle p-3">
+                                        <i class="ti ti-file-invoice text-dark" style="font-size: 24px;"></i>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="text-muted mb-1" style="font-size: 0.875rem; font-weight: 500;">إجمالي الفواتير</h6>
-                                <h4 class="mb-0 text-dark fw-bold">{{ number_format($totalInvoices, 2) }} <small class="text-muted" style="font-size: 0.875rem;">SAR</small></h4>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="text-muted mb-1" style="font-size: 0.875rem; font-weight: 500;">إجمالي الفواتير <i class="ti ti-arrow-left fs-6"></i></h6>
+                                    <h4 class="mb-0 text-dark fw-bold">{{ number_format($totalInvoices, 2) }} <small class="text-muted" style="font-size: 0.875rem;">SAR</small></h4>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -243,6 +252,10 @@
     .card:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
         transform: translateY(-2px);
+    }
+    a .card:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+        transform: translateY(-3px);
     }
     .card-header {
         background-color: #f8f9fa;
