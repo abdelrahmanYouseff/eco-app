@@ -30,6 +30,7 @@ class Contract extends Model
         'general_services_amount',
         'fixed_amounts',
         'insurance_policy_number',
+        'contract_pdf_path',
         'broker_id',
     ];
 

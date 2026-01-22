@@ -37,6 +37,63 @@
                             </a>
                         </div>
                     </div>
+                    <!-- Contract PDF Section -->
+                    <div class="card-body border-bottom">
+                        <h6 class="mb-3">
+                            <i class="ti ti-file-type-pdf me-2"></i>
+                            ملف العقد (PDF)
+                        </h6>
+                        @if($contract->contract_pdf_path)
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="flex-grow-1">
+                                    <i class="ti ti-file-pdf text-danger me-2"></i>
+                                    <span>ملف العقد مرفق</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('property-management.contracts.download-pdf', $contract->id) }}" 
+                                       class="btn btn-sm btn-dark" 
+                                       target="_blank">
+                                        <i class="ti ti-download"></i> عرض/تحميل
+                                    </a>
+                                    <form action="{{ route('property-management.contracts.delete-pdf', $contract->id) }}" 
+                                          method="POST" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('هل أنت متأكد من حذف ملف العقد؟');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="ti ti-trash"></i> حذف
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @else
+                            <div class="mb-3">
+                                <p class="text-muted mb-2">لا يوجد ملف PDF مرفق للعقد</p>
+                            </div>
+                        @endif
+                        <form action="{{ route('property-management.contracts.upload-pdf', $contract->id) }}" 
+                              method="POST" 
+                              enctype="multipart/form-data"
+                              class="d-flex align-items-end gap-2">
+                            @csrf
+                            <div class="flex-grow-1">
+                                <input type="file" 
+                                       name="contract_pdf" 
+                                       id="contract_pdf" 
+                                       class="form-control @error('contract_pdf') is-invalid @enderror" 
+                                       accept=".pdf"
+                                       required>
+                                @error('contract_pdf')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">الحد الأقصى لحجم الملف: 10 ميجابايت (PDF فقط)</small>
+                            </div>
+                            <button type="submit" class="btn btn-dark">
+                                <i class="ti ti-upload"></i> رفع الملف
+                            </button>
+                        </form>
+                    </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">

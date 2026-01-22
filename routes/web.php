@@ -87,6 +87,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/contracts/bulk-delete', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'bulkDelete'])->name('contracts.bulk-delete');
         Route::post('/contracts/{contractId}/payments/{paymentId}/mark-as-paid', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'markPaymentAsPaid'])->name('contracts.payments.mark-as-paid');
         Route::get('/contracts/{id}', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'show'])->name('contracts.show');
+        Route::post('/contracts/{id}/upload-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'uploadPdf'])->name('contracts.upload-pdf');
+        Route::get('/contracts/{id}/download-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'downloadPdf'])->name('contracts.download-pdf');
+        Route::delete('/contracts/{id}/delete-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'deletePdf'])->name('contracts.delete-pdf');
 
         // Tenants
         Route::get('/tenants', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'index'])->name('tenants.index');

@@ -11,6 +11,7 @@ use App\PropertyManagement\Models\Unit;
 use App\PropertyManagement\Services\Contracts\ContractService;
 use App\PropertyManagement\Services\Payments\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ContractController extends Controller
 {
@@ -208,6 +209,95 @@ class ContractController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('property-management.contracts.show', $contractId ?? 0)
                 ->with('error', 'حدث خطأ أثناء تسجيل السداد: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Upload contract PDF
+     */
+    public function uploadPdf(Request $request, $id)
+    {
+        $request->validate([
+            'contract_pdf' => 'required|file|mimes:pdf|max:10240', // Max 10MB
+        ]);
+
+        try {
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+
+            // Delete old PDF if exists
+            if ($contract->contract_pdf_path && Storage::disk('public')->exists($contract->contract_pdf_path)) {
+                Storage::disk('public')->delete($contract->contract_pdf_path);
+            }
+
+            // Store new PDF
+            $file = $request->file('contract_pdf');
+            $fileName = 'contract_' . $contract->contract_number . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('contracts', $fileName, 'public');
+
+            // Update contract
+            $contract->contract_pdf_path = $path;
+            $contract->save();
+
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('success', 'تم رفع ملف العقد بنجاح');
+        } catch (\Exception $e) {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'حدث خطأ أثناء رفع الملف: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download contract PDF
+     */
+    public function downloadPdf($id)
+    {
+        try {
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+
+            if (!$contract->contract_pdf_path) {
+                return redirect()->route('property-management.contracts.show', $id)
+                    ->with('error', 'لا يوجد ملف PDF مرفق لهذا العقد');
+            }
+
+            if (!Storage::disk('public')->exists($contract->contract_pdf_path)) {
+                return redirect()->route('property-management.contracts.show', $id)
+                    ->with('error', 'الملف غير موجود في النظام');
+            }
+
+            return Storage::disk('public')->download($contract->contract_pdf_path, 'contract_' . $contract->contract_number . '.pdf');
+        } catch (\Exception $e) {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'حدث خطأ أثناء تحميل الملف: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete contract PDF
+     */
+    public function deletePdf($id)
+    {
+        try {
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+
+            if (!$contract->contract_pdf_path) {
+                return redirect()->route('property-management.contracts.show', $id)
+                    ->with('error', 'لا يوجد ملف PDF مرفق لهذا العقد');
+            }
+
+            // Delete file from storage
+            if (Storage::disk('public')->exists($contract->contract_pdf_path)) {
+                Storage::disk('public')->delete($contract->contract_pdf_path);
+            }
+
+            // Update contract
+            $contract->contract_pdf_path = null;
+            $contract->save();
+
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('success', 'تم حذف ملف العقد بنجاح');
+        } catch (\Exception $e) {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'حدث خطأ أثناء حذف الملف: ' . $e->getMessage());
         }
     }
 }
