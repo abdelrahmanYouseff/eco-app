@@ -45,7 +45,7 @@ class ContractController extends Controller
     public function create(Request $request)
     {
         $buildings = Building::all(['id', 'name']);
-        
+
         // Get only units that don't have active contracts
         $units = Unit::with('building')
             ->whereDoesntHave('contracts', function($query) {
@@ -53,16 +53,16 @@ class ContractController extends Controller
                       ->where('end_date', '>=', now());
             })
             ->get();
-        
+
         $clients = Client::all(['id', 'name', 'client_type']);
         $brokers = Broker::all(['id', 'name']);
-        
+
         // Clear new_client_id from session after using it
         $newClientId = session('new_client_id');
         if ($newClientId) {
             session()->forget('new_client_id');
         }
-        
+
         return view('property_management.contracts.create', compact('buildings', 'units', 'clients', 'brokers', 'newClientId'));
     }
 
@@ -75,6 +75,7 @@ class ContractController extends Controller
             'client_id' => 'required|exists:clients,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
+            'contract_signing_date' => 'nullable|date',
             'is_conditional' => 'boolean',
             'total_rent' => 'required|numeric|min:0',
             'annual_rent' => 'required|numeric|min:0',
@@ -131,9 +132,9 @@ class ContractController extends Controller
         $contract = \App\PropertyManagement\Models\Contract::with([
             'building', 'unit', 'client', 'broker', 'representatives', 'rentPayments', 'invoices', 'receiptVouchers'
         ])->findOrFail($id);
-        
+
         $dueAmounts = $this->contractService->calculateDueAmounts($contract);
-        
+
         return view('property_management.contracts.show', compact('contract', 'dueAmounts'));
     }
 
@@ -147,7 +148,7 @@ class ContractController extends Controller
         try {
             $contractIds = $request->input('contract_ids');
             $contracts = \App\PropertyManagement\Models\Contract::whereIn('id', $contractIds)->get();
-            
+
             $deletedCount = 0;
             $skippedCount = 0;
             $errors = [];
@@ -157,13 +158,13 @@ class ContractController extends Controller
                     // Delete all related records first
                     // Delete rent payments
                     $contract->rentPayments()->delete();
-                    
+
                     // Delete representatives
                     $contract->representatives()->delete();
-                    
+
                     // Delete transactions
                     $contract->transactions()->delete();
-                    
+
                     // Delete contract
                     $contract->delete();
                     $deletedCount++;

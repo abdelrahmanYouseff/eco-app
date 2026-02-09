@@ -35,18 +35,24 @@ class PaymentService
         // If rent_cycle is 12 months, each payment covers 12 months worth of rent
         $cycleRent = ($contract->annual_rent * $rentCycle) / 12;
         
-        // الخدمات العامة والمبالغ الثابتة تُضاف بالكامل مع كل دفعة استحقاق
-        // Services and fixed amounts are added in full with each payment due date
+        // الخدمات العامة تُضاف بالكامل مع كل دفعة استحقاق
+        // Services are added in full with each payment due date
         $cycleServices = $contract->general_services_amount; // Full amount, not divided
-        $cycleFixedAmounts = $contract->fixed_amounts; // Full amount, not divided
+        
+        // المبالغ الثابتة تُقسم على عدد دورات الإيجار في السنة
+        // Fixed amounts are divided by the number of payment cycles per year
+        // Example: if fixed_amounts = 3000 and rent_cycle = 6 months (2 cycles per year)
+        // then cycleFixedAmounts = 3000 / 2 = 1500 per payment
+        $cyclesPerYear = 12 / $rentCycle;
+        $cycleFixedAmounts = $contract->fixed_amounts / $cyclesPerYear;
         
         // VAT is calculated based on rent cycle (proportional to rent)
         $cycleVat = ($contract->vat_amount * $rentCycle) / 12;
 
-        // First payment due date is after rent_cycle months from start date
-        // Example: if start_date is 2024-01-01 and rent_cycle is 6 months,
-        // first payment due_date will be 2024-07-01
-        $currentDate = $startDate->copy()->addMonths($rentCycle);
+        // First payment due date is start date + 10 days
+        // Example: if start_date is 2024-01-17, first payment due_date will be 2024-01-27
+        // Subsequent payments: previous due date + rent_cycle months
+        $currentDate = $startDate->copy()->addDays(10);
 
         while ($currentDate->lte($endDate)) {
             $dueDate = $currentDate->copy();
@@ -72,6 +78,7 @@ class PaymentService
                 $this->createPaymentDueNotification($payment, $daysUntilDue);
             }
             
+            // Next payment due date: current due date + rent_cycle months
             $currentDate->addMonths($rentCycle);
         }
 

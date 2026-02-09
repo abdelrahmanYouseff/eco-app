@@ -180,7 +180,21 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-4 mb-3">
+                                    <label for="contract_signing_date" class="form-label fw-bold">
+                                        تاريخ إبرام العقد
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control @error('contract_signing_date') is-invalid @enderror" 
+                                           id="contract_signing_date" 
+                                           name="contract_signing_date" 
+                                           value="{{ old('contract_signing_date') }}">
+                                    @error('contract_signing_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-4 mb-3">
                                     <label for="start_date" class="form-label fw-bold">
                                         تاريخ البدء <span class="text-danger">*</span>
                                     </label>
@@ -195,7 +209,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-4 mb-3">
                                     <label for="end_date" class="form-label fw-bold">
                                         تاريخ الانتهاء <span class="text-danger">*</span>
                                     </label>

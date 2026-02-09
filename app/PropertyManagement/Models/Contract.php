@@ -20,6 +20,7 @@ class Contract extends Model
         'client_id',
         'start_date',
         'end_date',
+        'contract_signing_date',
         'is_conditional',
         'total_rent',
         'annual_rent',
@@ -37,6 +38,7 @@ class Contract extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'contract_signing_date' => 'date',
         'is_conditional' => 'boolean',
         'total_rent' => 'decimal:2',
         'annual_rent' => 'decimal:2',
