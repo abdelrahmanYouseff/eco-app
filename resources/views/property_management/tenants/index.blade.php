@@ -14,7 +14,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
@@ -37,7 +37,7 @@
                                 </div>
                             </div>
                         </form>
-                        
+
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead class="table-light">
@@ -65,14 +65,17 @@
                                                 <a href="{{ route('property-management.tenants.show', $tenant->id) }}" class="btn btn-sm btn-outline-dark">
                                                     <i class="ti ti-eye"></i> عرض
                                                 </a>
-                                                <form action="{{ route('property-management.tenants.destroy', $tenant->id) }}" 
-                                                      method="POST" 
+                                                <a href="{{ route('property-management.tenants.edit', $tenant->id) }}" class="btn btn-sm btn-outline-dark">
+                                                    <i class="ti ti-edit"></i> تعديل
+                                                </a>
+                                                <form action="{{ route('property-management.tenants.destroy', $tenant->id) }}"
+                                                      method="POST"
                                                       class="d-inline"
                                                       onsubmit="return confirm('هل أنت متأكد من حذف المستأجر {{ $tenant->name }}؟');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" 
-                                                            class="btn btn-sm btn-outline-dark" 
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-dark"
                                                             title="حذف">
                                                         <i class="ti ti-trash"></i> حذف
                                                     </button>
@@ -93,7 +96,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         @if(method_exists($tenants, 'links'))
                             {{ $tenants->links() }}
                         @endif

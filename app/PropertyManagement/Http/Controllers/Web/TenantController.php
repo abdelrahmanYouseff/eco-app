@@ -21,10 +21,10 @@ class TenantController extends Controller
     public function index(Request $request)
     {
         $query = $request->input('search');
-        $tenants = $query 
+        $tenants = $query
             ? $this->tenantService->searchTenants($query)
             : Client::with('contracts')->paginate(15);
-        
+
         return view('property_management.tenants.index', compact('tenants', 'query'));
     }
 
@@ -32,7 +32,7 @@ class TenantController extends Controller
     {
         $returnTo = $request->input('return_to');
         $contractData = $request->input('contract_data');
-        
+
         return view('property_management.tenants.create', compact('returnTo', 'contractData'));
     }
 
@@ -51,7 +51,7 @@ class TenantController extends Controller
 
         try {
             $tenant = $this->tenantService->createTenant($validated);
-            
+
             // Check if we should return to contract creation page
             $returnTo = $request->input('return_to');
             if ($returnTo === 'contract') {
@@ -59,7 +59,7 @@ class TenantController extends Controller
                     ->with('success', 'تم إضافة العميل بنجاح')
                     ->with('new_client_id', $tenant->id);
             }
-            
+
             return redirect()->route('property-management.tenants.index')
                 ->with('success', 'Tenant created successfully');
         } catch (\Exception $e) {
@@ -71,21 +71,52 @@ class TenantController extends Controller
     {
         $tenant = Client::with(['contracts.unit.building', 'contracts.rentPayments'])->findOrFail($id);
         $statement = $this->tenantService->getAccountStatement($tenant);
-        
+
         return view('property_management.tenants.show', compact('tenant', 'statement'));
+    }
+
+    public function edit($id)
+    {
+        $tenant = Client::findOrFail($id);
+        return view('property_management.tenants.edit', compact('tenant'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $tenant = Client::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'client_type' => 'required|in:فرد,شركة',
+            'id_number_or_cr' => 'required|string|unique:clients,id_number_or_cr,' . $id,
+            'id_type' => 'nullable|string',
+            'nationality' => 'nullable|string',
+            'email' => 'nullable|email|unique:clients,email,' . $id,
+            'mobile' => 'required|string|unique:clients,mobile,' . $id,
+            'national_address' => 'nullable|string',
+        ]);
+
+        try {
+            $tenant->update($validated);
+
+            return redirect()->route('property-management.tenants.index')
+                ->with('success', 'تم تحديث بيانات المستأجر بنجاح');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'حدث خطأ أثناء تحديث بيانات المستأجر: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
     {
         try {
             $tenant = Client::findOrFail($id);
-            
+
             // Check if tenant has contracts
             if ($tenant->contracts()->count() > 0) {
                 return redirect()->route('property-management.tenants.index')
                     ->with('error', 'لا يمكن حذف المستأجر لأنه مرتبط بعقود');
             }
-            
+
             $tenant->delete();
             return redirect()->route('property-management.tenants.index')
                 ->with('success', 'تم حذف المستأجر بنجاح');
@@ -147,10 +178,10 @@ class TenantController extends Controller
                 })
                 ->orderBy('receipt_date', 'asc')
                 ->get();
-            
+
             // Get the last payment date to limit transactions up to that point
             $lastPaymentDate = $allReceiptVouchers->max('receipt_date');
-            
+
             // Create a map of rent payment IDs to due dates for quick lookup
             $rentPaymentDueDates = [];
             foreach ($allRentPayments as $payment) {
@@ -184,7 +215,7 @@ class TenantController extends Controller
                     $contractNumbers = $contracts->pluck('contract_number')->implode('، ');
                     $contractsDescription .= ' (أرقام العقود: ' . $contractNumbers . ')';
                 }
-                
+
                 $transactions[] = [
                     'operation_number' => $transactionNumber++,
                     'reference_number' => 'إجمالي المستحقات',
@@ -201,7 +232,7 @@ class TenantController extends Controller
             // Add all receipt vouchers as credits (الدائن)
             foreach ($allReceiptVouchers as $receipt) {
                 $runningBalance -= $receipt->amount;
-                
+
                 // Get due date from related rent payment if available
                 $dueDate = null;
                 if ($receipt->rent_payment_id && isset($rentPaymentDueDates[$receipt->rent_payment_id])) {
@@ -233,7 +264,7 @@ class TenantController extends Controller
                 if ($lastPaymentDate && $payment->due_date > $lastPaymentDate) {
                     continue; // Skip payments after last payment date
                 }
-                
+
                 $paidAmount = $rentPaymentPaidMap[$payment->id] ?? 0;
                 $remainingAmount = $payment->total_value - $paidAmount;
 

@@ -95,6 +95,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/tenants', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'index'])->name('tenants.index');
         Route::get('/tenants/create', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'create'])->name('tenants.create');
         Route::post('/tenants', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'store'])->name('tenants.store');
+        Route::get('/tenants/{id}/edit', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'edit'])->name('tenants.edit');
+        Route::put('/tenants/{id}', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'update'])->name('tenants.update');
         Route::get('/tenants/account-statements', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'customerAccountStatements'])->name('tenants.account-statements');
         Route::get('/tenants/{id}', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'show'])->name('tenants.show');
         Route::delete('/tenants/{id}', [\App\PropertyManagement\Http\Controllers\Web\TenantController::class, 'destroy'])->name('tenants.destroy');
