@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/add', [UserController::class, 'addNewUserView'])->name('user.add');
     Route::get('/user/list', [UserController::class, 'userList'])->name('user.list');
     Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{id}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
 

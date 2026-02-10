@@ -55,6 +55,36 @@ class UserController extends Controller
     return redirect()->back()->with('success', 'User added successfully.');
 }
 
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+        $companies = Company::all();
+        return view('owner.users.edit_user', compact('user', 'companies'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'phone_number' => 'required|string|max:20',
+            'role' => 'required|string|in:building_admin,company_admin,employee,visitor,accountant,editor',
+            'company_id' => 'nullable|exists:companies,id',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone_number'],
+            'role' => $validated['role'],
+            'company_id' => $validated['company_id'] ?? null,
+        ]);
+
+        return redirect()->route('user.list')->with('success', 'User updated successfully.');
+    }
+
     public function destroy($id)
     {
         try {

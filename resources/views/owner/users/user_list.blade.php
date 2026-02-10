@@ -60,6 +60,10 @@
                                 <span class="badge bg-info">Employee</span>
                             @elseif($user->role === 'visitor')
                                 <span class="badge bg-warning">Visitor</span>
+                            @elseif($user->role === 'accountant')
+                                <span class="badge bg-danger">Accountant</span>
+                            @elseif($user->role === 'editor')
+                                <span class="badge bg-dark">Editor</span>
                             @else
                                 <span class="badge bg-secondary">{{ $user->role }}</span>
                             @endif
@@ -86,6 +90,11 @@
                                         onclick="viewUserDetails({{ $user->id }})" title="View Details">
                                     <i class="ti ti-eye"></i>
                                 </button>
+                                <a href="{{ route('users.edit', $user->id) }}" 
+                                   class="btn btn-sm btn-outline-success" 
+                                   title="تعديل">
+                                    <i class="ti ti-edit"></i>
+                                </a>
                                 <button type="button" class="btn btn-sm btn-outline-info"
                                         onclick="generateQRCode('{{ $user->badge_id }}')" title="Generate QR Code">
                                     <i class="ti ti-qrcode"></i>
