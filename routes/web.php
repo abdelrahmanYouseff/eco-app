@@ -110,6 +110,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/payments', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{paymentId}/request-payment', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'requestPayment'])->name('payments.request-payment');
         Route::get('/payments/contract/{contractId}', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'contractPayments'])->name('payments.contract');
+        Route::put('/payments/{paymentId}', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'updatePayment'])->name('payments.update');
 
         // Invoices
         Route::get('/invoices', [\App\PropertyManagement\Http\Controllers\Web\InvoiceController::class, 'index'])->name('invoices.index');

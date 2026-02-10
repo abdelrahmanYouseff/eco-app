@@ -1,5 +1,9 @@
 @extends('master')
 
+@push('head')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
+
 @section('content')
 <div class="pc-container">
     <div class="pc-content">
@@ -14,7 +18,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="col-md-12">
                 @if(session('success'))
@@ -104,7 +108,7 @@
                     $totalDue = 0;
                     $totalPaid = 0;
                     $overdue = 0;
-                    
+
                     foreach($tenant->contracts as $contract) {
                         foreach($contract->rentPayments as $payment) {
                             $totalDue += $payment->total_value;
@@ -114,14 +118,14 @@
                                 // يمكن إضافة منطق لحساب المدفوع جزئياً لاحقاً
                                 $totalPaid += $payment->total_value * 0.5; // تقدير
                             }
-                            
+
                             // حساب المتأخرات
                             if($payment->status != 'paid' && $payment->due_date < now()) {
                                 $overdue += $payment->total_value;
                             }
                         }
                     }
-                    
+
                     $balance = $statement['summary']['balance'] ?? 0;
                 @endphp
                 <div class="row mb-4">
@@ -250,7 +254,7 @@
                         return $item['payment']->due_date;
                     });
                 @endphp
-                
+
                 @if($allPayments->count() > 0)
                 <div class="card mb-4">
                     <div class="card-header">
@@ -297,12 +301,40 @@
                                             @endif
                                         </td>
                                         <td class="align-middle">{{ $payment->issued_date->format('Y-m-d') }}</td>
-                                        <td class="text-end align-middle">{{ number_format($payment->rent_value, 2) }} ريال</td>
+                                        <td class="text-end align-middle">
+                                            <input type="number"
+                                                   class="form-control form-control-sm editable-field text-end"
+                                                   data-payment-id="{{ $payment->id }}"
+                                                   data-field="rent_value"
+                                                   value="{{ $payment->rent_value }}"
+                                                   step="0.01"
+                                                   min="0"
+                                                   style="width: 120px; display: inline-block;">
+                                            <span class="ms-1">ريال</span>
+                                        </td>
                                         <td class="text-end align-middle">{{ number_format($payment->services_value, 2) }} ريال</td>
                                         <td class="text-end align-middle">{{ number_format($payment->vat_value, 2) }} ريال</td>
-                                        <td class="text-end align-middle">{{ number_format($payment->fixed_amounts ?? 0, 2) }} ريال</td>
                                         <td class="text-end align-middle">
-                                            <strong>{{ number_format($payment->total_value, 2) }} ريال</strong>
+                                            <input type="number"
+                                                   class="form-control form-control-sm editable-field text-end"
+                                                   data-payment-id="{{ $payment->id }}"
+                                                   data-field="fixed_amounts"
+                                                   value="{{ $payment->fixed_amounts ?? 0 }}"
+                                                   step="0.01"
+                                                   min="0"
+                                                   style="width: 120px; display: inline-block;">
+                                            <span class="ms-1">ريال</span>
+                                        </td>
+                                        <td class="text-end align-middle">
+                                            <input type="number"
+                                                   class="form-control form-control-sm editable-field text-end"
+                                                   data-payment-id="{{ $payment->id }}"
+                                                   data-field="total_value"
+                                                   value="{{ $payment->total_value }}"
+                                                   step="0.01"
+                                                   min="0"
+                                                   style="width: 120px; display: inline-block;">
+                                            <span class="ms-1">ريال</span>
                                         </td>
                                         <td class="text-center align-middle">
                                             @if($payment->status == 'paid')
@@ -355,20 +387,140 @@
     .stats-card-available {
         background-color: #198754 !important;
     }
-    
+
     .stats-card-occupied {
         background-color: #dc3545 !important;
     }
-    
+
     .table th {
         font-weight: 600;
         color: #495057;
     }
-    
+
     .card-header {
         background-color: #f8f9fa;
         border-bottom: 1px solid #dee2e6;
     }
+
+    .editable-field {
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .editable-field:focus {
+        border-color: #212529;
+        box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.25);
+        background-color: #fff;
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editableFields = document.querySelectorAll('.editable-field');
+
+    editableFields.forEach(field => {
+        let originalValue = field.value;
+        let timeout;
+
+        // عند تغيير القيمة
+        field.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const paymentId = this.getAttribute('data-payment-id');
+            const fieldName = this.getAttribute('data-field');
+
+            // تحديث الإجمالي فوراً
+            updateTotal(paymentId);
+
+            // حفظ التعديلات بعد 1 ثانية من التوقف عن الكتابة
+            timeout = setTimeout(() => {
+                savePaymentField(paymentId, fieldName, this.value);
+            }, 1000);
+        });
+
+        // عند الضغط على Enter
+        field.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(timeout);
+                const paymentId = this.getAttribute('data-payment-id');
+                const fieldName = this.getAttribute('data-field');
+                savePaymentField(paymentId, fieldName, this.value);
+                this.blur();
+            }
+        });
+
+        // عند فقدان التركيز
+        field.addEventListener('blur', function() {
+            clearTimeout(timeout);
+            const paymentId = this.getAttribute('data-payment-id');
+            const fieldName = this.getAttribute('data-field');
+            savePaymentField(paymentId, fieldName, this.value);
+        });
+    });
+
+    function updateTotal(paymentId) {
+        const row = document.querySelector(`input[data-payment-id="${paymentId}"]`).closest('tr');
+        const rentValueInput = row.querySelector('input[data-field="rent_value"]');
+        const fixedAmountsInput = row.querySelector('input[data-field="fixed_amounts"]');
+        const totalValueInput = row.querySelector('input[data-field="total_value"]');
+
+        if (rentValueInput && fixedAmountsInput && totalValueInput) {
+            // الحصول على القيم الثابتة من النص (الخدمات والضريبة)
+            const servicesText = row.querySelector('td:nth-child(6)').textContent.trim();
+            const vatText = row.querySelector('td:nth-child(7)').textContent.trim();
+            const servicesValue = parseFloat(servicesText.replace(/[^\d.]/g, '')) || 0;
+            const vatValue = parseFloat(vatText.replace(/[^\d.]/g, '')) || 0;
+
+            const rentValue = parseFloat(rentValueInput.value) || 0;
+            const fixedAmounts = parseFloat(fixedAmountsInput.value) || 0;
+
+            // تحديث الإجمالي فقط إذا لم يتم تعديله مباشرة
+            if (document.activeElement !== totalValueInput) {
+                const total = rentValue + servicesValue + vatValue + fixedAmounts;
+                totalValueInput.value = total.toFixed(2);
+            }
+        }
+    }
+
+    function savePaymentField(paymentId, fieldName, value) {
+        const data = {
+            [fieldName]: parseFloat(value) || 0
+        };
+
+        fetch(`/property-management/payments/${paymentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                               document.querySelector('input[name="_token"]')?.value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // تحديث الإجمالي من الاستجابة
+                const totalInput = document.querySelector(`input[data-payment-id="${paymentId}"][data-field="total_value"]`);
+                if (totalInput && data.payment) {
+                    totalInput.value = parseFloat(data.payment.total_value).toFixed(2);
+                }
+
+                // إظهار رسالة نجاح خفيفة
+                const field = document.querySelector(`input[data-payment-id="${paymentId}"][data-field="${fieldName}"]`);
+                if (field) {
+                    field.style.borderColor = '#28a745';
+                    setTimeout(() => {
+                        field.style.borderColor = '#dee2e6';
+                    }, 1000);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء حفظ التعديلات');
+        });
+    }
+});
+</script>
 @endsection
 
