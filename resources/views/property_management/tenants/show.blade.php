@@ -302,7 +302,7 @@
                                         </td>
                                         <td class="align-middle">{{ $payment->issued_date->format('Y-m-d') }}</td>
                                         <td class="text-end align-middle">
-                                            @if(auth()->user()->role === 'accountant')
+                                            @if(auth()->user()->role === 'accountant' || auth()->user()->role === 'editor')
                                                 <input type="number"
                                                        class="form-control form-control-sm editable-field text-end"
                                                        data-payment-id="{{ $payment->id }}"
@@ -319,7 +319,7 @@
                                         <td class="text-end align-middle">{{ number_format($payment->services_value, 2) }} ريال</td>
                                         <td class="text-end align-middle">{{ number_format($payment->vat_value, 2) }} ريال</td>
                                         <td class="text-end align-middle">
-                                            @if(auth()->user()->role === 'accountant')
+                                            @if(auth()->user()->role === 'accountant' || auth()->user()->role === 'editor')
                                                 <input type="number"
                                                        class="form-control form-control-sm editable-field text-end"
                                                        data-payment-id="{{ $payment->id }}"
@@ -334,7 +334,7 @@
                                             @endif
                                         </td>
                                         <td class="text-end align-middle">
-                                            @if(auth()->user()->role === 'accountant')
+                                            @if(auth()->user()->role === 'accountant' || auth()->user()->role === 'editor')
                                                 <input type="number"
                                                        class="form-control form-control-sm editable-field text-end"
                                                        data-payment-id="{{ $payment->id }}"
