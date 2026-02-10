@@ -169,8 +169,8 @@
                                             <th style="min-width: 150px;">
                                                 <i class="ti ti-user me-1"></i> العميل
                                             </th>
-                                            <th style="min-width: 100px;">
-                                                <i class="ti ti-layout-grid me-1"></i> الوحدة
+                                            <th style="min-width: 150px;">
+                                                <i class="ti ti-layout-grid me-1"></i> الوحدة / النوع
                                             </th>
                                             <th style="min-width: 120px;">
                                                 <i class="ti ti-calendar me-1"></i> تاريخ البدء
@@ -221,9 +221,20 @@
                                                 </div>
                                             </td>
                                             <td class="align-middle">
-                                                <span class="badge bg-secondary text-dark">
-                                                    {{ $contract->unit->unit_number ?? 'N/A' }}
-                                                </span>
+                                                @if($contract->unit)
+                                                    <div>
+                                                        <span class="badge bg-secondary text-dark mb-1">
+                                                            {{ $contract->unit->unit_number }}
+                                                        </span>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            <i class="ti ti-tag me-1"></i>
+                                                            {{ $contract->unit->unit_type ?? '-' }}
+                                                        </small>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             </td>
                                             <td class="align-middle">
                                                 <span class="text-muted">

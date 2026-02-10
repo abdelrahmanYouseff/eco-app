@@ -411,13 +411,17 @@
                                         </td>
                                         <td class="text-center align-middle">
                                             @if($payment->status != 'paid')
-                                                <button type="button"
-                                                        class="btn btn-sm btn-dark"
-                                                        title="سداد الدفعة"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#paymentModal{{ $payment->id }}">
-                                                    سداد الدفعة
-                                                </button>
+                                                @if(auth()->user()->role !== 'editor')
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-dark"
+                                                            title="سداد الدفعة"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#paymentModal{{ $payment->id }}">
+                                                        سداد الدفعة
+                                                    </button>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif

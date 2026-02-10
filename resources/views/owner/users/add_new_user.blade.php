@@ -42,6 +42,7 @@
             <option value="employee">Employee</option>
             <option value="visitor">Visitor</option>
             <option value="accountant">Accountant</option>
+            <option value="editor">Editor</option>
           </select>
         </div>
         <div class="mb-3">

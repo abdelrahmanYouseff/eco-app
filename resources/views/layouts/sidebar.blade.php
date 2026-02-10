@@ -30,121 +30,159 @@
       </div>
       <div class="navbar-content">
         <ul class="pc-navbar">
-          @if(auth()->user()->role !== 'accountant')
-            <li class="pc-item">
-              <a href="{{ route('building.owner.dashboard') }}" class="pc-link">
-                <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
-                <span class="pc-mtext">لوحة التحكم</span>
-              </a>
-            </li>
-
+          @if(auth()->user()->role === 'editor')
+            {{-- Editor Role: Only Property Management Section --}}
             <li class="pc-item pc-caption">
-              <label>إدارة الشركات</label>
-              <i class="ti ti-dashboard"></i>
+              <label>إدارة العقارات</label>
+              <i class="ti ti-building"></i>
             </li>
             <li class="pc-item">
-              <a href="{{ route('company.add') }}" class="pc-link">
+              <a href="{{ route('property-management.buildings.index') }}" class="pc-link">
                 <span class="pc-micon"><i class="ti ti-building"></i></span>
-                <span class="pc-mtext">إضافة شركة جديدة</span>
+                <span class="pc-mtext">المباني</span>
               </a>
             </li>
             <li class="pc-item">
-              <a href="{{ route('company.list') }}" class="pc-link">
-                <span class="pc-micon"><i class="ti ti-briefcase"></i></span>
-                <span class="pc-mtext">قائمة الشركات</span>
+              <a href="{{ route('property-management.units.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-layout-grid"></i></span>
+                <span class="pc-mtext">الوحدات / المكاتب</span>
               </a>
             </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.contracts.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-file-text"></i></span>
+                <span class="pc-mtext">العقود</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.tenants.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-users"></i></span>
+                <span class="pc-mtext">المستأجرون</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.brokers.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-user-check"></i></span>
+                <span class="pc-mtext">الوسطاء / الوكلاء</span>
+              </a>
+            </li>
+          @else
+            @if(auth()->user()->role !== 'accountant')
+              <li class="pc-item">
+                <a href="{{ route('building.owner.dashboard') }}" class="pc-link">
+                  <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+                  <span class="pc-mtext">لوحة التحكم</span>
+                </a>
+              </li>
+
+              <li class="pc-item pc-caption">
+                <label>إدارة الشركات</label>
+                <i class="ti ti-dashboard"></i>
+              </li>
+              <li class="pc-item">
+                <a href="{{ route('company.add') }}" class="pc-link">
+                  <span class="pc-micon"><i class="ti ti-building"></i></span>
+                  <span class="pc-mtext">إضافة شركة جديدة</span>
+                </a>
+              </li>
+              <li class="pc-item">
+                <a href="{{ route('company.list') }}" class="pc-link">
+                  <span class="pc-micon"><i class="ti ti-briefcase"></i></span>
+                  <span class="pc-mtext">قائمة الشركات</span>
+                </a>
+              </li>
+
+              <li class="pc-item pc-caption">
+                <label>المستخدمون</label>
+                <i class="ti ti-news"></i>
+              </li>
+              <li class="pc-item">
+                <a href="{{ route('user.add') }}" class="pc-link">
+                  <span class="pc-micon"><i class="ti ti-user-plus"></i></span>
+                  <span class="pc-mtext">إضافة مستخدم جديد</span>
+                </a>
+              </li>
+              <li class="pc-item">
+                <a href="{{ route('user.list') }}" class="pc-link">
+                  <span class="pc-micon"><i class="ti ti-users"></i></span>
+                  <span class="pc-mtext">قائمة المستخدمين</span>
+                </a>
+              </li>
+            @endif
 
             <li class="pc-item pc-caption">
-              <label>المستخدمون</label>
-              <i class="ti ti-news"></i>
+              <label>إدارة العقارات</label>
+              <i class="ti ti-building"></i>
             </li>
             <li class="pc-item">
-              <a href="{{ route('user.add') }}" class="pc-link">
-                <span class="pc-micon"><i class="ti ti-user-plus"></i></span>
-                <span class="pc-mtext">إضافة مستخدم جديد</span>
+              <a href="{{ route('property-management.buildings.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-building"></i></span>
+                <span class="pc-mtext">المباني</span>
               </a>
             </li>
             <li class="pc-item">
-              <a href="{{ route('user.list') }}" class="pc-link">
+              <a href="{{ route('property-management.units.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-layout-grid"></i></span>
+                <span class="pc-mtext">الوحدات / المكاتب</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.contracts.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-file-text"></i></span>
+                <span class="pc-mtext">العقود</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.tenants.index') }}" class="pc-link">
                 <span class="pc-micon"><i class="ti ti-users"></i></span>
-                <span class="pc-mtext">قائمة المستخدمين</span>
+                <span class="pc-mtext">المستأجرون / العملاء</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.payments.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-currency-dollar"></i></span>
+                <span class="pc-mtext">دفعات الإيجار</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.invoices.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-file-invoice"></i></span>
+                <span class="pc-mtext">الفواتير</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.receipt-vouchers.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-receipt"></i></span>
+                <span class="pc-mtext">سندات القبض</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.accounting.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-report-analytics"></i></span>
+                <span class="pc-mtext">المحاسبة / الكشوفات</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.tenants.account-statements') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-report"></i></span>
+                <span class="pc-mtext">كشف حساب العملاء</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.brokers.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-user-check"></i></span>
+                <span class="pc-mtext">الوسطاء / الوكلاء</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.settings.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-settings"></i></span>
+                <span class="pc-mtext">الإعدادات</span>
               </a>
             </li>
           @endif
 
-          <li class="pc-item pc-caption">
-            <label>إدارة العقارات</label>
-            <i class="ti ti-building"></i>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.buildings.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-building"></i></span>
-              <span class="pc-mtext">المباني</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.units.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-layout-grid"></i></span>
-              <span class="pc-mtext">الوحدات / المكاتب</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.contracts.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-file-text"></i></span>
-              <span class="pc-mtext">العقود</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.tenants.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-users"></i></span>
-              <span class="pc-mtext">المستأجرون / العملاء</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.payments.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-currency-dollar"></i></span>
-              <span class="pc-mtext">دفعات الإيجار</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.invoices.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-file-invoice"></i></span>
-              <span class="pc-mtext">الفواتير</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.receipt-vouchers.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-receipt"></i></span>
-              <span class="pc-mtext">سندات القبض</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.accounting.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-report-analytics"></i></span>
-              <span class="pc-mtext">المحاسبة / الكشوفات</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.tenants.account-statements') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-report"></i></span>
-              <span class="pc-mtext">كشف حساب العملاء</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.brokers.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-user-check"></i></span>
-              <span class="pc-mtext">الوسطاء / الوكلاء</span>
-            </a>
-          </li>
-          <li class="pc-item">
-            <a href="{{ route('property-management.settings.index') }}" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-settings"></i></span>
-              <span class="pc-mtext">الإعدادات</span>
-            </a>
-          </li>
-
-          @if(auth()->user()->role !== 'accountant')
+          @if(auth()->user()->role !== 'accountant' && auth()->user()->role !== 'editor')
             <li class="pc-item pc-caption">
               <label>الخدمات</label>
               <i class="ti ti-brand-chrome"></i>

@@ -52,6 +52,7 @@ class LoginController extends Controller
             'company_admin' => redirect()->route('building.admin.dashboard'),
             'employee'      => redirect()->route('employee.dashboard'),
             'visitor'       => redirect()->route('visitor.dashboard'),
+            'editor'        => redirect()->route('property-management.buildings.index'),
             default         => redirect('/'),
         };
     }
