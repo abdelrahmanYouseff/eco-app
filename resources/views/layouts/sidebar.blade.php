@@ -253,6 +253,18 @@
             </li>
           @endif
 
+          {{-- Activity Logs --}}
+          <li class="pc-item pc-caption mt-4">
+            <label>السجلات</label>
+            <i class="ti ti-file-text"></i>
+          </li>
+          <li class="pc-item">
+            <a href="{{ route('activity-logs.index') }}" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-list"></i></span>
+              <span class="pc-mtext">سجل الإجراءات</span>
+            </a>
+          </li>
+
           {{-- Logout for All Roles --}}
           <li class="pc-item pc-caption mt-4">
             <label>الحساب</label>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,11 +27,31 @@ class LoginController extends Controller
             ]);
         }
 
+        // Log login activity
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'login',
+            'description' => 'User logged in',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
         return $this->redirectByRole(Auth::user()->role);
     }
 
     public function logout()
     {
+        // Log logout activity before logging out
+        if (Auth::check()) {
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'logout',
+                'description' => 'User logged out',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
+
         Auth::logout();
         return redirect('/');
     }

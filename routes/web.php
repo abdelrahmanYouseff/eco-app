@@ -32,6 +32,9 @@ Route::post('/login', [LoginController::class, 'login']); // معالجة تسج
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // معالجة تسجيل الخروج
 
+    // Activity Logs
+    Route::get('/activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
+
     Route::get('/building/owner/dashboard', [LoginController::class, 'ownerDashboardView'])
         ->name('building.owner.dashboard');
 
