@@ -66,21 +66,6 @@
                 <span class="pc-mtext">الوسطاء / الوكلاء</span>
               </a>
             </li>
-
-            {{-- Logout for Editor --}}
-            <li class="pc-item pc-caption mt-4">
-              <label>الحساب</label>
-              <i class="ti ti-user"></i>
-            </li>
-            <li class="pc-item">
-              <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="pc-link w-100 text-start border-0 bg-transparent" style="cursor: pointer;">
-                  <span class="pc-micon"><i class="ti ti-logout"></i></span>
-                  <span class="pc-mtext">تسجيل الخروج</span>
-                </button>
-              </form>
-            </li>
           @else
             @if(auth()->user()->role !== 'accountant')
               <li class="pc-item">
@@ -267,6 +252,21 @@
               </a>
             </li>
           @endif
+
+          {{-- Logout for All Roles --}}
+          <li class="pc-item pc-caption mt-4">
+            <label>الحساب</label>
+            <i class="ti ti-user"></i>
+          </li>
+          <li class="pc-item">
+            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+              @csrf
+              <button type="submit" class="pc-link w-100 text-start border-0 bg-transparent" style="cursor: pointer;">
+                <span class="pc-micon"><i class="ti ti-logout"></i></span>
+                <span class="pc-mtext">تسجيل الخروج</span>
+              </button>
+            </form>
+          </li>
 
         </ul>
       </div>
