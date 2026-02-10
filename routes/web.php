@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/contracts/{contractId}/payments/{paymentId}/mark-as-paid', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'markPaymentAsPaid'])->name('contracts.payments.mark-as-paid');
         Route::get('/contracts/{id}', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'show'])->name('contracts.show');
         Route::post('/contracts/{id}/upload-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'uploadPdf'])->name('contracts.upload-pdf');
+        Route::get('/contracts/{id}/view-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'viewPdf'])->name('contracts.view-pdf');
         Route::get('/contracts/{id}/download-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'downloadPdf'])->name('contracts.download-pdf');
         Route::delete('/contracts/{id}/delete-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'deletePdf'])->name('contracts.delete-pdf');
 

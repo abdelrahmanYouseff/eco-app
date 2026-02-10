@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('contracts')) {
-            Schema::dropIfExists('contracts');
-        }
-        
-        Schema::create('contracts', function (Blueprint $table) {
+        // Don't drop table if it exists - it may have foreign key constraints
+        // Only create if it doesn't exist
+        if (!Schema::hasTable('contracts')) {
+            Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->string('contract_number')->unique();
             $table->enum('contract_type', ['جديد', 'مجدد']);
@@ -34,14 +33,15 @@ return new class extends Migration
             $table->decimal('general_services_amount', 15, 2)->default(0);
             $table->string('insurance_policy_number')->nullable();
             $table->unsignedBigInteger('broker_id')->nullable();
-            $table->timestamps();
-        });
-        
-        // Add foreign key constraint only if brokers table exists
-        if (Schema::hasTable('brokers')) {
-            Schema::table('contracts', function (Blueprint $table) {
-                $table->foreign('broker_id')->references('id')->on('brokers')->onDelete('set null');
+                $table->timestamps();
             });
+
+            // Add foreign key constraint only if brokers table exists
+            if (Schema::hasTable('brokers')) {
+                Schema::table('contracts', function (Blueprint $table) {
+                    $table->foreign('broker_id')->references('id')->on('brokers')->onDelete('set null');
+                });
+            }
         }
     }
 

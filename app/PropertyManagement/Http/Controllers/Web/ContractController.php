@@ -248,6 +248,35 @@ class ContractController extends Controller
     }
 
     /**
+     * View contract PDF in browser
+     */
+    public function viewPdf($id)
+    {
+        try {
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+
+            if (!$contract->contract_pdf_path) {
+                return redirect()->route('property-management.contracts.show', $id)
+                    ->with('error', 'لا يوجد ملف PDF مرفق لهذا العقد');
+            }
+
+            $filePath = storage_path('app/public/' . $contract->contract_pdf_path);
+
+            if (!file_exists($filePath)) {
+                return redirect()->route('property-management.contracts.show', $id)
+                    ->with('error', 'الملف غير موجود في النظام');
+            }
+
+            return response()->file($filePath, [
+                'Content-Type' => 'application/pdf',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'حدث خطأ أثناء عرض الملف: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Download contract PDF
      */
     public function downloadPdf($id)
@@ -260,12 +289,14 @@ class ContractController extends Controller
                     ->with('error', 'لا يوجد ملف PDF مرفق لهذا العقد');
             }
 
-            if (!Storage::disk('public')->exists($contract->contract_pdf_path)) {
+            $filePath = storage_path('app/public/' . $contract->contract_pdf_path);
+
+            if (!file_exists($filePath)) {
                 return redirect()->route('property-management.contracts.show', $id)
                     ->with('error', 'الملف غير موجود في النظام');
             }
 
-            return Storage::disk('public')->download($contract->contract_pdf_path, 'contract_' . $contract->contract_number . '.pdf');
+            return response()->download($filePath, 'contract_' . $contract->contract_number . '.pdf');
         } catch (\Exception $e) {
             return redirect()->route('property-management.contracts.show', $id)
                 ->with('error', 'حدث خطأ أثناء تحميل الملف: ' . $e->getMessage());
