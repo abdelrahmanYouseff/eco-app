@@ -138,6 +138,86 @@ class ContractController extends Controller
         return view('property_management.contracts.show', compact('contract', 'dueAmounts'));
     }
 
+    public function edit($id)
+    {
+        $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+        $buildings = Building::all(['id', 'name']);
+
+        // Get all units (including the current contract's unit)
+        $units = Unit::with('building')->get();
+
+        $clients = Client::all(['id', 'name', 'client_type']);
+        $brokers = Broker::all(['id', 'name']);
+
+        return view('property_management.contracts.edit', compact('contract', 'buildings', 'units', 'clients', 'brokers'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'contract_type' => 'required|in:جديد,مجدد',
+            'building_id' => 'required|exists:buildings,id',
+            'unit_id' => 'required|exists:units,id',
+            'client_id' => 'required|exists:clients,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'contract_signing_date' => 'nullable|date',
+            'is_conditional' => 'boolean',
+            'total_rent' => 'required|numeric|min:0',
+            'annual_rent' => 'required|numeric|min:0',
+            'deposit_amount' => 'numeric|min:0',
+            'rent_cycle' => 'required|integer|min:1',
+            'vat_amount' => 'numeric|min:0',
+            'general_services_amount' => 'numeric|min:0',
+            'fixed_amounts' => 'numeric|min:0',
+            'insurance_policy_number' => 'nullable|string',
+            'broker_id' => 'nullable|exists:brokers,id',
+        ]);
+
+        try {
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+
+            // Check if unit has an active contract (excluding current contract)
+            $activeContract = \App\PropertyManagement\Models\Contract::where('unit_id', $validated['unit_id'])
+                ->where('id', '!=', $id)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+
+            if ($activeContract) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'لا يمكن تعديل العقد لأن الوحدة تحتوي على عقد ساري آخر (عقد رقم: ' . $activeContract->contract_number . ')');
+            }
+
+            // Check if the new contract dates overlap with any existing contract for this unit (excluding current contract)
+            $overlappingContract = \App\PropertyManagement\Models\Contract::where('unit_id', $validated['unit_id'])
+                ->where('id', '!=', $id)
+                ->where(function($query) use ($validated) {
+                    $query->whereBetween('start_date', [$validated['start_date'], $validated['end_date']])
+                          ->orWhereBetween('end_date', [$validated['start_date'], $validated['end_date']])
+                          ->orWhere(function($q) use ($validated) {
+                              $q->where('start_date', '<=', $validated['start_date'])
+                                ->where('end_date', '>=', $validated['end_date']);
+                          });
+                })
+                ->first();
+
+            if ($overlappingContract) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'لا يمكن تعديل العقد لأن التواريخ تتداخل مع عقد موجود (عقد رقم: ' . $overlappingContract->contract_number . ')');
+            }
+
+            $contract->update($validated);
+
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('success', 'تم تحديث العقد بنجاح');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'حدث خطأ أثناء تحديث العقد: ' . $e->getMessage());
+        }
+    }
+
     public function bulkDelete(Request $request)
     {
         $request->validate([

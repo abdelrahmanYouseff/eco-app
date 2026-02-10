@@ -84,6 +84,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/contracts', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'index'])->name('contracts.index');
         Route::get('/contracts/create', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'create'])->name('contracts.create');
         Route::post('/contracts', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'store'])->name('contracts.store');
+        Route::get('/contracts/{id}/edit', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'edit'])->name('contracts.edit');
+        Route::put('/contracts/{id}', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'update'])->name('contracts.update');
         Route::delete('/contracts/bulk-delete', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'bulkDelete'])->name('contracts.bulk-delete');
         Route::post('/contracts/{contractId}/payments/{paymentId}/mark-as-paid', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'markPaymentAsPaid'])->name('contracts.payments.mark-as-paid');
         Route::get('/contracts/{id}', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'show'])->name('contracts.show');

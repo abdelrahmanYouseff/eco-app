@@ -255,6 +255,11 @@
                                                        title="عرض التفاصيل">
                                                         <i class="ti ti-eye"></i>
                                                     </a>
+                                                    <a href="{{ route('property-management.contracts.edit', $contract->id) }}" 
+                                                       class="btn btn-sm btn-outline-dark" 
+                                                       title="تعديل">
+                                                        <i class="ti ti-edit"></i>
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>
