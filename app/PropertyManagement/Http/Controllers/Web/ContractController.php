@@ -190,8 +190,12 @@ class ContractController extends Controller
         }
     }
 
-    public function markPaymentAsPaid($contractId, $paymentId)
+    public function markPaymentAsPaid(Request $request, $contractId, $paymentId)
     {
+        $request->validate([
+            'receipt_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Max 5MB
+        ]);
+
         try {
             $contract = \App\PropertyManagement\Models\Contract::findOrFail($contractId);
             $payment = RentPayment::where('contract_id', $contractId)
@@ -202,6 +206,15 @@ class ContractController extends Controller
                 return redirect()->route('property-management.contracts.show', $contractId)
                     ->with('warning', 'هذه الدفعة مدفوعة بالفعل');
             }
+
+            // Store receipt image
+            $file = $request->file('receipt_image');
+            $fileName = 'receipt_' . $contract->contract_number . '_' . $paymentId . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('receipts', $fileName, 'public');
+
+            // Update payment with receipt image path
+            $payment->receipt_image_path = $path;
+            $payment->save();
 
             $result = $this->paymentService->markPaymentAsPaid($payment);
 

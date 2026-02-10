@@ -137,6 +137,90 @@
                     </div>
                 </div>
 
+                <!-- معلومات العميل -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="ti ti-user me-2"></i>
+                            معلومات العميل
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th style="width: 200px;">الاسم:</th>
+                                        <td>
+                                            <strong>{{ $contract->client->name }}</strong>
+                                            <a href="{{ route('property-management.tenants.show', $contract->client_id) }}"
+                                               class="btn btn-sm btn-outline-dark ms-2"
+                                               title="عرض تفاصيل العميل">
+                                                <i class="ti ti-eye"></i> عرض التفاصيل
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>نوع العميل:</th>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ $contract->client->client_type }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>رقم الهوية / السجل التجاري:</th>
+                                        <td>{{ $contract->client->id_number_or_cr }}</td>
+                                    </tr>
+                                    @if($contract->client->id_type)
+                                    <tr>
+                                        <th>نوع الهوية:</th>
+                                        <td>{{ $contract->client->id_type }}</td>
+                                    </tr>
+                                    @endif
+                                    @if($contract->client->nationality)
+                                    <tr>
+                                        <th>الجنسية:</th>
+                                        <td>{{ $contract->client->nationality }}</td>
+                                    </tr>
+                                    @endif
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th style="width: 200px;">رقم الجوال:</th>
+                                        <td>
+                                            <a href="tel:{{ $contract->client->mobile }}" class="text-decoration-none">
+                                                <i class="ti ti-phone me-1"></i>{{ $contract->client->mobile }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @if($contract->client->email)
+                                    <tr>
+                                        <th>البريد الإلكتروني:</th>
+                                        <td>
+                                            <a href="mailto:{{ $contract->client->email }}" class="text-decoration-none">
+                                                <i class="ti ti-mail me-1"></i>{{ $contract->client->email }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @else
+                                    <tr>
+                                        <th>البريد الإلكتروني:</th>
+                                        <td><span class="text-muted">غير متوفر</span></td>
+                                    </tr>
+                                    @endif
+                                    @if($contract->client->national_address)
+                                    <tr>
+                                        <th>العنوان الوطني:</th>
+                                        <td>{{ $contract->client->national_address }}</td>
+                                    </tr>
+                                    @endif
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- المبالغ المالية -->
                 <div class="row mb-4">
                     <div class="col-md-3">
@@ -327,15 +411,13 @@
                                         </td>
                                         <td class="text-center align-middle">
                                             @if($payment->status != 'paid')
-                                                <form action="{{ route('property-management.contracts.payments.mark-as-paid', ['contractId' => $contract->id, 'paymentId' => $payment->id]) }}"
-                                                      method="POST"
-                                                      class="d-inline"
-                                                      onsubmit="return confirm('هل أنت متأكد من تسجيل السداد لهذه الدفعة؟ سيتم إنشاء فاتورة وسند قبض تلقائياً.');">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success" title="تم السداد">
-                                                        <i class="ti ti-check"></i> تم السداد
-                                                    </button>
-                                                </form>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-dark"
+                                                        title="سداد الدفعة"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#paymentModal{{ $payment->id }}">
+                                                    سداد الدفعة
+                                                </button>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -609,5 +691,135 @@
         border-bottom: 1px solid #dee2e6;
     }
 </style>
+
+<!-- Payment Modal -->
+@foreach($contract->rentPayments->sortBy('due_date') as $payment)
+@if($payment->status != 'paid')
+<div class="modal fade" id="paymentModal{{ $payment->id }}" tabindex="-1" aria-labelledby="paymentModalLabel{{ $payment->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel{{ $payment->id }}">
+                    <i class="ti ti-currency-dollar me-2"></i>
+                    تفاصيل الدفعة
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                        <h6 class="mb-3">معلومات الدفعة</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong>تاريخ الاستحقاق:</strong>
+                                <span class="ms-2">{{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}</span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>تاريخ الإصدار:</strong>
+                                <span class="ms-2">{{ \Carbon\Carbon::parse($payment->issued_date)->format('Y-m-d') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                        <h6 class="mb-3">تفاصيل المبالغ</h6>
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <td style="width: 50%;"><strong>قيمة الإيجار:</strong></td>
+                                <td class="text-end">{{ number_format($payment->rent_value, 2) }} ريال</td>
+                            </tr>
+                            <tr>
+                                <td><strong>قيمة الخدمات:</strong></td>
+                                <td class="text-end">{{ number_format($payment->services_value, 2) }} ريال</td>
+                            </tr>
+                            <tr>
+                                <td><strong>قيمة الضريبة:</strong></td>
+                                <td class="text-end">{{ number_format($payment->vat_value, 2) }} ريال</td>
+                            </tr>
+                            <tr>
+                                <td><strong>المبالغ الثابتة:</strong></td>
+                                <td class="text-end">{{ number_format($payment->fixed_amounts ?? 0, 2) }} ريال</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td><strong class="fs-5">الإجمالي:</strong></td>
+                                <td class="text-end"><strong class="fs-5 text-primary">{{ number_format($payment->total_value, 2) }} ريال</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mb-3">
+                    <i class="ti ti-info-circle me-2"></i>
+                    <small>سيتم إنشاء فاتورة وسند قبض تلقائياً عند تأكيد السداد.</small>
+                </div>
+
+                <form action="{{ route('property-management.contracts.payments.mark-as-paid', ['contractId' => $contract->id, 'paymentId' => $payment->id]) }}"
+                      method="POST"
+                      enctype="multipart/form-data"
+                      id="paymentForm{{ $payment->id }}">
+                    @csrf
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="mb-3">رفع صورة الإيصال</h6>
+                            <div class="mb-2">
+                                <label for="receipt_image{{ $payment->id }}" class="form-label">
+                                    <strong>صورة الإيصال <span class="text-danger">*</span></strong>
+                                </label>
+                                <input type="file"
+                                       class="form-control @error('receipt_image') is-invalid @enderror"
+                                       id="receipt_image{{ $payment->id }}"
+                                       name="receipt_image"
+                                       accept="image/*"
+                                       required>
+                                @error('receipt_image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">الحد الأقصى لحجم الملف: 5 ميجابايت (صورة فقط: JPG, PNG, GIF)</small>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit"
+                            class="btn btn-dark"
+                            id="submitBtn{{ $payment->id }}">
+                        <i class="ti ti-check me-1"></i>
+                        تأكيد السداد
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+@endforeach
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    @foreach($contract->rentPayments->sortBy('due_date') as $payment)
+    @if($payment->status != 'paid')
+    const receiptInput{{ $payment->id }} = document.getElementById('receipt_image{{ $payment->id }}');
+    const submitBtn{{ $payment->id }} = document.getElementById('submitBtn{{ $payment->id }}');
+
+    if (receiptInput{{ $payment->id }} && submitBtn{{ $payment->id }}) {
+        receiptInput{{ $payment->id }}.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                // Enable submit button when file is selected
+                submitBtn{{ $payment->id }}.disabled = false;
+            } else {
+                submitBtn{{ $payment->id }}.disabled = true;
+            }
+        });
+
+        // Disable submit button initially until file is selected
+        submitBtn{{ $payment->id }}.disabled = true;
+    }
+    @endif
+    @endforeach
+});
+</script>
 @endsection
 
