@@ -41,6 +41,7 @@
             <option value="company_admin">Company Admin</option>
             <option value="employee">Employee</option>
             <option value="visitor">Visitor</option>
+            <option value="accountant">Accountant</option>
           </select>
         </div>
         <div class="mb-3">
