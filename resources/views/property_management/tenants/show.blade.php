@@ -302,39 +302,51 @@
                                         </td>
                                         <td class="align-middle">{{ $payment->issued_date->format('Y-m-d') }}</td>
                                         <td class="text-end align-middle">
-                                            <input type="number"
-                                                   class="form-control form-control-sm editable-field text-end"
-                                                   data-payment-id="{{ $payment->id }}"
-                                                   data-field="rent_value"
-                                                   value="{{ $payment->rent_value }}"
-                                                   step="0.01"
-                                                   min="0"
-                                                   style="width: 120px; display: inline-block;">
-                                            <span class="ms-1">ريال</span>
+                                            @if(auth()->user()->role === 'accountant')
+                                                <input type="number"
+                                                       class="form-control form-control-sm editable-field text-end"
+                                                       data-payment-id="{{ $payment->id }}"
+                                                       data-field="rent_value"
+                                                       value="{{ $payment->rent_value }}"
+                                                       step="0.01"
+                                                       min="0"
+                                                       style="width: 120px; display: inline-block;">
+                                                <span class="ms-1">ريال</span>
+                                            @else
+                                                {{ number_format($payment->rent_value, 2) }} ريال
+                                            @endif
                                         </td>
                                         <td class="text-end align-middle">{{ number_format($payment->services_value, 2) }} ريال</td>
                                         <td class="text-end align-middle">{{ number_format($payment->vat_value, 2) }} ريال</td>
                                         <td class="text-end align-middle">
-                                            <input type="number"
-                                                   class="form-control form-control-sm editable-field text-end"
-                                                   data-payment-id="{{ $payment->id }}"
-                                                   data-field="fixed_amounts"
-                                                   value="{{ $payment->fixed_amounts ?? 0 }}"
-                                                   step="0.01"
-                                                   min="0"
-                                                   style="width: 120px; display: inline-block;">
-                                            <span class="ms-1">ريال</span>
+                                            @if(auth()->user()->role === 'accountant')
+                                                <input type="number"
+                                                       class="form-control form-control-sm editable-field text-end"
+                                                       data-payment-id="{{ $payment->id }}"
+                                                       data-field="fixed_amounts"
+                                                       value="{{ $payment->fixed_amounts ?? 0 }}"
+                                                       step="0.01"
+                                                       min="0"
+                                                       style="width: 120px; display: inline-block;">
+                                                <span class="ms-1">ريال</span>
+                                            @else
+                                                {{ number_format($payment->fixed_amounts ?? 0, 2) }} ريال
+                                            @endif
                                         </td>
                                         <td class="text-end align-middle">
-                                            <input type="number"
-                                                   class="form-control form-control-sm editable-field text-end"
-                                                   data-payment-id="{{ $payment->id }}"
-                                                   data-field="total_value"
-                                                   value="{{ $payment->total_value }}"
-                                                   step="0.01"
-                                                   min="0"
-                                                   style="width: 120px; display: inline-block;">
-                                            <span class="ms-1">ريال</span>
+                                            @if(auth()->user()->role === 'accountant')
+                                                <input type="number"
+                                                       class="form-control form-control-sm editable-field text-end"
+                                                       data-payment-id="{{ $payment->id }}"
+                                                       data-field="total_value"
+                                                       value="{{ $payment->total_value }}"
+                                                       step="0.01"
+                                                       min="0"
+                                                       style="width: 120px; display: inline-block;">
+                                                <span class="ms-1">ريال</span>
+                                            @else
+                                                <strong>{{ number_format($payment->total_value, 2) }}</strong> ريال
+                                            @endif
                                         </td>
                                         <td class="text-center align-middle">
                                             @if($payment->status == 'paid')
