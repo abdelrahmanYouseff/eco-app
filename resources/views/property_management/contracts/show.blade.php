@@ -1,5 +1,9 @@
 @extends('master')
 
+@push('head')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
+
 @section('content')
 <div class="pc-container">
     <div class="pc-content">
@@ -388,11 +392,53 @@
                                         <td class="text-center">{{ $index + 1 }}</td>
                                         <td>{{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}</td>
                                         <td>{{ \Carbon\Carbon::parse($payment->issued_date)->format('Y-m-d') }}</td>
-                                        <td class="text-end">{{ number_format($payment->rent_value, 2) }} ريال</td>
+                                        <td class="text-end">
+                                            @if(auth()->user()->role === 'accountant')
+                                                <input type="number"
+                                                       class="form-control form-control-sm editable-field text-end"
+                                                       data-payment-id="{{ $payment->id }}"
+                                                       data-field="rent_value"
+                                                       value="{{ $payment->rent_value }}"
+                                                       step="0.01"
+                                                       min="0"
+                                                       style="width: 120px; display: inline-block;">
+                                                <span class="ms-1">ريال</span>
+                                            @else
+                                                {{ number_format($payment->rent_value, 2) }} ريال
+                                            @endif
+                                        </td>
                                         <td class="text-end">{{ number_format($payment->services_value, 2) }} ريال</td>
                                         <td class="text-end">{{ number_format($payment->vat_value, 2) }} ريال</td>
-                                        <td class="text-end">{{ number_format($payment->fixed_amounts ?? 0, 2) }} ريال</td>
-                                        <td class="text-end"><strong>{{ number_format($payment->total_value, 2) }} ريال</strong></td>
+                                        <td class="text-end">
+                                            @if(auth()->user()->role === 'accountant')
+                                                <input type="number"
+                                                       class="form-control form-control-sm editable-field text-end"
+                                                       data-payment-id="{{ $payment->id }}"
+                                                       data-field="fixed_amounts"
+                                                       value="{{ $payment->fixed_amounts ?? 0 }}"
+                                                       step="0.01"
+                                                       min="0"
+                                                       style="width: 120px; display: inline-block;">
+                                                <span class="ms-1">ريال</span>
+                                            @else
+                                                {{ number_format($payment->fixed_amounts ?? 0, 2) }} ريال
+                                            @endif
+                                        </td>
+                                        <td class="text-end">
+                                            @if(auth()->user()->role === 'accountant')
+                                                <input type="number"
+                                                       class="form-control form-control-sm editable-field text-end"
+                                                       data-payment-id="{{ $payment->id }}"
+                                                       data-field="total_value"
+                                                       value="{{ $payment->total_value }}"
+                                                       step="0.01"
+                                                       min="0"
+                                                       style="width: 120px; display: inline-block;">
+                                                <span class="ms-1">ريال</span>
+                                            @else
+                                                <strong>{{ number_format($payment->total_value, 2) }}</strong> ريال
+                                            @endif
+                                        </td>
                                         <td class="text-center">
                                             @if($payment->status == 'paid')
                                                 <span class="badge bg-success">مدفوع</span>
@@ -823,7 +869,128 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     @endif
     @endforeach
+
+    // Editable fields functionality for Accountant
+    const editableFields = document.querySelectorAll('.editable-field');
+
+    editableFields.forEach(field => {
+        let timeout;
+
+        // عند تغيير القيمة
+        field.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const paymentId = this.getAttribute('data-payment-id');
+            const fieldName = this.getAttribute('data-field');
+
+            // تحديث الإجمالي فوراً
+            updateTotal(paymentId);
+
+            // حفظ التعديلات بعد 1 ثانية من التوقف عن الكتابة
+            timeout = setTimeout(() => {
+                savePaymentField(paymentId, fieldName, this.value);
+            }, 1000);
+        });
+
+        // عند الضغط على Enter
+        field.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(timeout);
+                const paymentId = this.getAttribute('data-payment-id');
+                const fieldName = this.getAttribute('data-field');
+                savePaymentField(paymentId, fieldName, this.value);
+                this.blur();
+            }
+        });
+
+        // عند فقدان التركيز
+        field.addEventListener('blur', function() {
+            clearTimeout(timeout);
+            const paymentId = this.getAttribute('data-payment-id');
+            const fieldName = this.getAttribute('data-field');
+            savePaymentField(paymentId, fieldName, this.value);
+        });
+    });
+
+    function updateTotal(paymentId) {
+        const row = document.querySelector(`input[data-payment-id="${paymentId}"]`).closest('tr');
+        const rentValueInput = row.querySelector('input[data-field="rent_value"]');
+        const fixedAmountsInput = row.querySelector('input[data-field="fixed_amounts"]');
+        const totalValueInput = row.querySelector('input[data-field="total_value"]');
+
+        if (rentValueInput && fixedAmountsInput && totalValueInput) {
+            // الحصول على القيم الثابتة من النص (الخدمات والضريبة)
+            // في جدول العقد: العمود 5 = الخدمات، العمود 6 = الضريبة
+            const servicesCell = row.querySelectorAll('td')[4]; // index 4 = العمود 5
+            const vatCell = row.querySelectorAll('td')[5]; // index 5 = العمود 6
+            const servicesText = servicesCell ? servicesCell.textContent.trim() : '0';
+            const vatText = vatCell ? vatCell.textContent.trim() : '0';
+            const servicesValue = parseFloat(servicesText.replace(/[^\d.]/g, '')) || 0;
+            const vatValue = parseFloat(vatText.replace(/[^\d.]/g, '')) || 0;
+
+            const rentValue = parseFloat(rentValueInput.value) || 0;
+            const fixedAmounts = parseFloat(fixedAmountsInput.value) || 0;
+
+            // تحديث الإجمالي فقط إذا لم يتم تعديله مباشرة
+            if (document.activeElement !== totalValueInput) {
+                const total = rentValue + servicesValue + vatValue + fixedAmounts;
+                totalValueInput.value = total.toFixed(2);
+            }
+        }
+    }
+
+    function savePaymentField(paymentId, fieldName, value) {
+        const data = {
+            [fieldName]: parseFloat(value) || 0
+        };
+
+        fetch(`/property-management/payments/${paymentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                               document.querySelector('input[name="_token"]')?.value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // تحديث الإجمالي من الاستجابة
+                const totalInput = document.querySelector(`input[data-payment-id="${paymentId}"][data-field="total_value"]`);
+                if (totalInput && data.payment) {
+                    totalInput.value = parseFloat(data.payment.total_value).toFixed(2);
+                }
+
+                // إظهار رسالة نجاح خفيفة
+                const field = document.querySelector(`input[data-payment-id="${paymentId}"][data-field="${fieldName}"]`);
+                if (field) {
+                    field.style.borderColor = '#28a745';
+                    setTimeout(() => {
+                        field.style.borderColor = '#dee2e6';
+                    }, 1000);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء حفظ التعديلات');
+        });
+    }
 });
 </script>
+
+<style>
+    .editable-field {
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .editable-field:focus {
+        border-color: #212529;
+        box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.25);
+        background-color: #fff;
+    }
+</style>
 @endsection
 
