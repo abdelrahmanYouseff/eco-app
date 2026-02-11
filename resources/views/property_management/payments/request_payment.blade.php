@@ -28,10 +28,20 @@
         }
 
         .date-line {
-            text-align: left;
+            text-align: right;
             margin-bottom: 25px;
             font-size: 14px;
             font-weight: normal;
+            line-height: 1.6;
+        }
+
+        .hijri-date {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .gregorian-date {
+            display: block;
         }
 
         .recipient {
@@ -48,7 +58,9 @@
 
         .greeting {
             margin-bottom: 20px;
-            font-size: 14px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: bold;
         }
 
         .body-text {
@@ -157,7 +169,6 @@
 
     <div class="container">
         <div class="date-line">
-            {{ \Carbon\Carbon::now()->format('Y/m/d') }} م /
             @php
                 // Simple Hijri date conversion (approximate)
                 $hijriYear = \Carbon\Carbon::now()->year - 579;
@@ -168,7 +179,8 @@
                     $hijriYear--;
                 }
             @endphp
-            {{ $hijriYear }}/{{ str_pad($hijriMonth, 2, '0', STR_PAD_LEFT) }}/{{ str_pad($hijriDay, 2, '0', STR_PAD_LEFT) }} هـ
+            <span class="hijri-date">{{ $hijriYear }}/{{ str_pad($hijriMonth, 2, '0', STR_PAD_LEFT) }}/{{ str_pad($hijriDay, 2, '0', STR_PAD_LEFT) }} هـ</span>
+            <span class="gregorian-date">{{ \Carbon\Carbon::now()->format('Y/m/d') }} م</span>
         </div>
 
         <div class="recipient">
@@ -185,7 +197,7 @@
 
         <div class="body-text">
             <p>
-                تشيرون إلى العقد رقم <strong>{{ $payment->contract->contract_number }}</strong> والمتعلق بإيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) في مبنى {{ $payment->contract->building->name ?? 'غير محدد' }}.
+                بالاشارة إلى العقد رقم <strong>{{ $payment->contract->contract_number }}</strong> والمتعلق بإيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) في مبنى {{ $payment->contract->building->name ?? 'غير محدد' }}.
             </p>
             <p>
                 يرجى العلم بأن هناك مبلغ مستحق يتعين تحويله إلى حساب الشركة، علماً بأن المساحة المؤجرة الفعلية هي <strong>{{ number_format($payment->contract->unit->area ?? 0, 0) }} متر مربع</strong>، بمعدل إيجار <strong>{{ number_format(($payment->contract->annual_rent ?? 0) / (($payment->contract->unit->area ?? 1) > 0 ? $payment->contract->unit->area : 1), 0) }} ريال</strong>.
