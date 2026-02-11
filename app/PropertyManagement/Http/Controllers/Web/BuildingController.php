@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Building;
 use App\Models\User;
 use App\PropertyManagement\Models\Unit;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 
 class BuildingController extends Controller
 {
+    use LogsActivity;
     public function index()
     {
         $buildings = Building::with('owner')->paginate(15);
@@ -36,6 +38,13 @@ class BuildingController extends Controller
 
         try {
             $building = Building::create($validated);
+
+            // Log activity
+            $this->logActivity(
+                'create',
+                $building,
+                "تم إنشاء مبنى جديد: {$building->name}"
+            );
 
             return redirect()->route('property-management.buildings.index')
                 ->with('success', 'تم إنشاء المبنى بنجاح');
@@ -83,8 +92,18 @@ class BuildingController extends Controller
 
         try {
             $building = Building::findOrFail($id);
+            $oldValues = $building->toArray();
             $oldUnitsCount = $building->units_count;
             $building->update($validated);
+
+            // Log activity
+            $this->logActivity(
+                'update',
+                $building,
+                "تم تحديث المبنى: {$building->name}",
+                $oldValues,
+                $building->fresh()->toArray()
+            );
 
             // إنشاء وحدات جديدة إذا زاد العدد
             if ($validated['units_count'] > $oldUnitsCount) {
@@ -109,6 +128,13 @@ class BuildingController extends Controller
                 return redirect()->route('property-management.buildings.index')
                     ->with('error', 'لا يمكن حذف المبنى لأنه يحتوي على وحدات');
             }
+
+            // Log activity before deletion
+            $this->logActivity(
+                'delete',
+                $building,
+                "تم حذف المبنى: {$building->name}"
+            );
 
             $building->delete();
             return redirect()->route('property-management.buildings.index')

@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Building;
 use App\PropertyManagement\Models\Unit;
 use App\PropertyManagement\Services\Buildings\BuildingService;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
+    use LogsActivity;
     public function __construct(
         private BuildingService $buildingService
     ) {}
@@ -143,7 +145,18 @@ class UnitController extends Controller
 
         try {
             $unit = Unit::findOrFail($id);
+            $oldValues = $unit->toArray();
             $unit = $this->buildingService->updateUnit($unit, $validated);
+            
+            // Log activity
+            $this->logActivity(
+                'update',
+                $unit,
+                "تم تحديث الوحدة: {$unit->unit_number}",
+                $oldValues,
+                $unit->fresh()->toArray()
+            );
+            
             return redirect()->route('property-management.units.index')
                 ->with('success', 'Unit updated successfully');
         } catch (\Exception $e) {
@@ -167,6 +180,13 @@ class UnitController extends Controller
                 return redirect()->route('property-management.units.index')
                     ->with('error', 'Cannot delete unit with active contracts');
             }
+            
+            // Log activity before deletion
+            $this->logActivity(
+                'delete',
+                $unit,
+                "تم حذف الوحدة: {$unit->unit_number}"
+            );
             
             // حذف الوحدة
             $unit->delete();

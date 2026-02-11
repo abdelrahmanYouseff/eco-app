@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\PropertyManagement\Models\Contract;
 use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Services\Payments\PaymentService;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
+    use LogsActivity;
     public function __construct(
         private PaymentService $paymentService
     ) {}
@@ -72,6 +74,13 @@ class PaymentController extends Controller
         }
 
         $payment->save();
+
+        // Log activity
+        $this->logActivity(
+            'update',
+            $payment,
+            "تم تحديث دفعة الإيجار - العقد: " . ($payment->contract->contract_number ?? 'N/A')
+        );
 
         return response()->json([
             'success' => true,
