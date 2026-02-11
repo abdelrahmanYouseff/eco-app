@@ -145,9 +145,9 @@
                                         <td class="text-center align-middle">{{ $unit->area }} m²</td>
                                         <td class="text-center align-middle">
                                             @if($unit->contracts->where('start_date', '<=', now())->where('end_date', '>=', now())->count() > 0)
-                                                <span class="badge bg-dark">مشغولة</span>
+                                                <span class="badge" style="background-color: #dc3545; color: #ffffff;">مؤجرة</span>
                                             @else
-                                                <span class="badge bg-secondary">متاحة</span>
+                                                <span class="badge" style="background-color: #28a745; color: #ffffff;">غير مؤجرة</span>
                                             @endif
                                         </td>
                                         <td class="text-center align-middle">

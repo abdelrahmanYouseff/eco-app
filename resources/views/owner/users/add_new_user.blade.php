@@ -43,6 +43,7 @@
             <option value="visitor">Visitor</option>
             <option value="accountant">Accountant</option>
             <option value="editor">Editor</option>
+            <option value="viewer">Viewer (Read Only)</option>
           </select>
         </div>
         <div class="mb-3">

@@ -64,6 +64,8 @@
                                 <span class="badge bg-danger">Accountant</span>
                             @elseif($user->role === 'editor')
                                 <span class="badge bg-dark">Editor</span>
+                            @elseif($user->role === 'viewer')
+                                <span class="badge bg-secondary">Viewer (Read Only)</span>
                             @else
                                 <span class="badge bg-secondary">{{ $user->role }}</span>
                             @endif

@@ -49,6 +49,14 @@ class PaymentController extends Controller
 
     public function updatePayment(Request $request, $paymentId)
     {
+        // Prevent viewer role from updating payments
+        if (auth()->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'ليس لديك صلاحية لتعديل الدفعات',
+            ], 403);
+        }
+
         $payment = RentPayment::findOrFail($paymentId);
 
         $validated = $request->validate([

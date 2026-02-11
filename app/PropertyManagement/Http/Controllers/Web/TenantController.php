@@ -30,6 +30,12 @@ class TenantController extends Controller
 
     public function create(Request $request)
     {
+        // Prevent viewer role from creating tenants
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.tenants.index')
+                ->with('error', 'ليس لديك صلاحية لإضافة مستأجرين');
+        }
+
         $returnTo = $request->input('return_to');
         $contractData = $request->input('contract_data');
 
@@ -38,6 +44,12 @@ class TenantController extends Controller
 
     public function store(Request $request)
     {
+        // Prevent viewer role from storing tenants
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.tenants.index')
+                ->with('error', 'ليس لديك صلاحية لإضافة مستأجرين');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'client_type' => 'required|in:فرد,شركة',
@@ -79,12 +91,24 @@ class TenantController extends Controller
 
     public function edit($id)
     {
+        // Prevent viewer role from editing tenants
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.tenants.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل المستأجرين');
+        }
+
         $tenant = Client::findOrFail($id);
         return view('property_management.tenants.edit', compact('tenant'));
     }
 
     public function update(Request $request, $id)
     {
+        // Prevent viewer role from updating tenants
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.tenants.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل المستأجرين');
+        }
+
         $tenant = Client::findOrFail($id);
 
         $validated = $request->validate([
@@ -112,6 +136,12 @@ class TenantController extends Controller
 
     public function destroy($id)
     {
+        // Prevent viewer role from deleting tenants
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.tenants.index')
+                ->with('error', 'ليس لديك صلاحية لحذف المستأجرين');
+        }
+
         try {
             $tenant = Client::findOrFail($id);
 

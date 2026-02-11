@@ -72,12 +72,24 @@ class UnitController extends Controller
 
     public function create()
     {
+        // Prevent viewer role from creating units
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.units.index')
+                ->with('error', 'ليس لديك صلاحية لإضافة وحدات');
+        }
+
         $buildings = Building::all(['id', 'name']);
         return view('property_management.units.create', compact('buildings'));
     }
 
     public function store(Request $request)
     {
+        // Prevent viewer role from storing units
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.units.index')
+                ->with('error', 'ليس لديك صلاحية لإضافة وحدات');
+        }
+
         $validated = $request->validate([
             'building_id' => 'required|exists:buildings,id',
             'unit_number' => 'required|string',
@@ -112,12 +124,18 @@ class UnitController extends Controller
 
     public function show($id)
     {
-        $unit = $this->buildingService->getUnitDetails($id);
+        $unit = Unit::with(['building', 'contracts.client', 'contracts.broker'])->findOrFail($id);
         return view('property_management.units.show', compact('unit'));
     }
 
     public function edit($id)
     {
+        // Prevent viewer role from editing units
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.units.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل الوحدات');
+        }
+
         $unit = Unit::with('building')->findOrFail($id);
         $buildings = Building::all(['id', 'name']);
         return view('property_management.units.edit', compact('unit', 'buildings'));
@@ -125,6 +143,12 @@ class UnitController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Prevent viewer role from updating units
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.units.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل الوحدات');
+        }
+
         $validated = $request->validate([
             'building_id' => 'required|exists:buildings,id',
             'unit_number' => 'required|string',
@@ -167,6 +191,12 @@ class UnitController extends Controller
 
     public function destroy($id)
     {
+        // Prevent viewer role from deleting units
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.units.index')
+                ->with('error', 'ليس لديك صلاحية لحذف الوحدات');
+        }
+
         try {
             $unit = Unit::findOrFail($id);
             $building = $unit->building;

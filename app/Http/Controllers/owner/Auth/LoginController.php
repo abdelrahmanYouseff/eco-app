@@ -83,6 +83,7 @@ class LoginController extends Controller
             'employee'      => redirect()->route('employee.dashboard'),
             'visitor'       => redirect()->route('visitor.dashboard'),
             'editor'        => redirect()->route('property-management.buildings.index'),
+            'viewer'        => redirect()->route('property-management.buildings.index'), // Viewer has read-only access
             default         => redirect('/'),
         };
     }

@@ -30,8 +30,8 @@
       </div>
       <div class="navbar-content">
         <ul class="pc-navbar">
-          @if(auth()->user()->role === 'editor')
-            {{-- Editor Role: Only Property Management Section --}}
+          @if(auth()->user()->role === 'editor' || auth()->user()->role === 'viewer')
+            {{-- Editor/Viewer Role: Only Property Management Section (Read-Only for Viewer) --}}
             <li class="pc-item pc-caption">
               <label>إدارة العقارات</label>
               <i class="ti ti-building"></i>
@@ -182,7 +182,7 @@
             </li>
           @endif
 
-          @if(auth()->user()->role !== 'accountant' && auth()->user()->role !== 'editor')
+          @if(auth()->user()->role !== 'accountant' && auth()->user()->role !== 'editor' && auth()->user()->role !== 'viewer')
             <li class="pc-item pc-caption">
               <label>الخدمات</label>
               <i class="ti ti-brand-chrome"></i>

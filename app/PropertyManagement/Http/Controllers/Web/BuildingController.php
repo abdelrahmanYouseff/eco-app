@@ -18,12 +18,24 @@ class BuildingController extends Controller
 
     public function create()
     {
+        // Prevent viewer role from creating buildings
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.buildings.index')
+                ->with('error', 'ليس لديك صلاحية لإضافة مباني');
+        }
+
         $owners = User::where('role', 'building_admin')->get(['id', 'name']);
         return view('property_management.buildings.create', compact('owners'));
     }
 
     public function store(Request $request)
     {
+        // Prevent viewer role from storing buildings
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.buildings.index')
+                ->with('error', 'ليس لديك صلاحية لإضافة مباني');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'owner_id' => 'required|exists:users,id',
@@ -79,6 +91,12 @@ class BuildingController extends Controller
 
     public function edit($id)
     {
+        // Prevent viewer role from editing buildings
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.buildings.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل المباني');
+        }
+
         $building = Building::findOrFail($id);
         $owners = User::where('role', 'building_admin')->get(['id', 'name']);
         return view('property_management.buildings.edit', compact('building', 'owners'));
@@ -86,6 +104,12 @@ class BuildingController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Prevent viewer role from updating buildings
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.buildings.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل المباني');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'owner_id' => 'required|exists:users,id',
@@ -127,6 +151,12 @@ class BuildingController extends Controller
 
     public function destroy($id)
     {
+        // Prevent viewer role from deleting buildings
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.buildings.index')
+                ->with('error', 'ليس لديك صلاحية لحذف المباني');
+        }
+
         try {
             $building = Building::findOrFail($id);
 

@@ -70,6 +70,27 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th>حالة الوحدة:</th>
+                                        <td>
+                                            @php
+                                                $hasActiveContract = $unit->contracts->where('start_date', '<=', now())
+                                                    ->where('end_date', '>=', now())
+                                                    ->count() > 0;
+                                            @endphp
+                                            @if($hasActiveContract)
+                                                <span class="badge bg-danger">
+                                                    <i class="ti ti-x me-1"></i>
+                                                    مشغولة
+                                                </span>
+                                            @else
+                                                <span class="badge bg-success">
+                                                    <i class="ti ti-check me-1"></i>
+                                                    متاحة
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th>الطابق:</th>
                                         <td>{{ $unit->floor_number }}</td>
                                     </tr>

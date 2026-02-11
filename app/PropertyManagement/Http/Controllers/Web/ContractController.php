@@ -45,6 +45,12 @@ class ContractController extends Controller
 
     public function create(Request $request)
     {
+        // Prevent viewer role from creating contracts
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.index')
+                ->with('error', 'ليس لديك صلاحية لإنشاء عقود');
+        }
+
         $buildings = Building::all(['id', 'name']);
 
         // Get only units that don't have active contracts
@@ -69,6 +75,12 @@ class ContractController extends Controller
 
     public function store(Request $request)
     {
+        // Prevent viewer role from storing contracts
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.index')
+                ->with('error', 'ليس لديك صلاحية لإنشاء عقود');
+        }
+
         $validated = $request->validate([
             'contract_type' => 'required|in:جديد,مجدد',
             'building_id' => 'required|exists:buildings,id',
@@ -144,6 +156,12 @@ class ContractController extends Controller
 
     public function edit($id)
     {
+        // Prevent viewer role from editing contracts
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل العقود');
+        }
+
         $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
         $buildings = Building::all(['id', 'name']);
 
@@ -158,6 +176,12 @@ class ContractController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Prevent viewer role from updating contracts
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'ليس لديك صلاحية لتعديل العقود');
+        }
+
         $validated = $request->validate([
             'contract_type' => 'required|in:جديد,مجدد',
             'building_id' => 'required|exists:buildings,id',
@@ -226,6 +250,12 @@ class ContractController extends Controller
 
     public function bulkDelete(Request $request)
     {
+        // Prevent viewer role from deleting contracts
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.index')
+                ->with('error', 'ليس لديك صلاحية لحذف العقود');
+        }
+
         $request->validate([
             'contract_ids' => 'required|array',
             'contract_ids.*' => 'exists:contracts,id',
@@ -280,6 +310,12 @@ class ContractController extends Controller
 
     public function markPaymentAsPaid(Request $request, $contractId, $paymentId)
     {
+        // Prevent viewer role from marking payments as paid
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.show', $contractId)
+                ->with('error', 'ليس لديك صلاحية لتسجيل السداد');
+        }
+
         $request->validate([
             'receipt_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Max 5MB
         ]);
@@ -334,6 +370,12 @@ class ContractController extends Controller
      */
     public function uploadPdf(Request $request, $id)
     {
+        // Prevent viewer role from uploading PDFs
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'ليس لديك صلاحية لرفع الملفات');
+        }
+
         $request->validate([
             'contract_pdf' => 'required|file|mimes:pdf|max:10240', // Max 10MB
         ]);
@@ -438,6 +480,12 @@ class ContractController extends Controller
      */
     public function deletePdf($id)
     {
+        // Prevent viewer role from deleting PDFs
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'ليس لديك صلاحية لحذف الملفات');
+        }
+
         try {
             $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
 
