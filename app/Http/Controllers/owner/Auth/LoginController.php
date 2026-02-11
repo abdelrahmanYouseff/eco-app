@@ -27,29 +27,38 @@ class LoginController extends Controller
             ]);
         }
 
-        // Log login activity
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'login',
-            'description' => 'User logged in',
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+        // Log login activity (optional - don't fail if table doesn't exist)
+        try {
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'login',
+                'description' => 'User logged in',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail if activity_logs table doesn't exist
+            // This allows login to work even if migrations haven't been run
+        }
 
         return $this->redirectByRole(Auth::user()->role);
     }
 
     public function logout()
     {
-        // Log logout activity before logging out
+        // Log logout activity before logging out (optional - don't fail if table doesn't exist)
         if (Auth::check()) {
-            ActivityLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'logout',
-                'description' => 'User logged out',
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
+            try {
+                ActivityLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'logout',
+                    'description' => 'User logged out',
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+            } catch (\Exception $e) {
+                // Silently fail if activity_logs table doesn't exist
+            }
         }
 
         Auth::logout();

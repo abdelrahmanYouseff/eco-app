@@ -29,8 +29,9 @@ class ContractController extends Controller
             $query->where('building_id', $request->building_id);
         }
 
-        // Filter by active contracts (default behavior)
-        if (!$request->filled('show_all')) {
+        // Show all contracts by default (removed the active contracts filter)
+        // Only filter if explicitly requested
+        if ($request->filled('show_active_only')) {
             $today = now()->toDateString();
             $query->where('start_date', '<=', $today)
                   ->where('end_date', '>=', $today);

@@ -129,9 +129,9 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-check mt-4">
-                                                <input class="form-check-input" type="checkbox" name="show_all" id="show_all" value="1" {{ request('show_all') ? 'checked' : '' }}>
-                                                <label class="form-check-label fw-semibold" for="show_all">
-                                                    <i class="ti ti-list-check me-1"></i> عرض جميع العقود
+                                                <input class="form-check-input" type="checkbox" name="show_active_only" id="show_active_only" value="1" {{ request('show_active_only') ? 'checked' : '' }}>
+                                                <label class="form-check-label fw-semibold" for="show_active_only">
+                                                    <i class="ti ti-list-check me-1"></i> عرض العقود النشطة فقط
                                                 </label>
                                             </div>
                                         </div>
