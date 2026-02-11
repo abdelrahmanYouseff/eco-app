@@ -10,129 +10,130 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Arial', 'Tahoma', sans-serif;
             font-size: 14px;
             line-height: 1.8;
             color: #000;
             background: #fff;
-            padding: 40px;
+            padding: 40px 60px;
             direction: rtl;
         }
-        
+
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: #fff;
         }
-        
-        .header {
-            margin-bottom: 30px;
-        }
-        
+
         .date-line {
             text-align: left;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             font-size: 14px;
+            font-weight: normal;
         }
-        
+
         .recipient {
-            margin-bottom: 15px;
-            font-size: 16px;
+            margin-bottom: 12px;
+            font-size: 15px;
             font-weight: bold;
         }
-        
+
         .subject {
-            margin-bottom: 15px;
-            font-size: 16px;
+            margin-bottom: 12px;
+            font-size: 15px;
             font-weight: bold;
         }
-        
+
         .greeting {
             margin-bottom: 20px;
             font-size: 14px;
         }
-        
+
         .body-text {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: justify;
             font-size: 14px;
-            line-height: 2;
+            line-height: 2.2;
         }
-        
+
         .body-text p {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            text-indent: 0;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 12px;
+            margin: 25px 0;
+            font-size: 11px;
         }
-        
+
         table th,
         table td {
             border: 1px solid #000;
-            padding: 8px 5px;
+            padding: 6px 4px;
             text-align: center;
+            font-size: 11px;
         }
-        
+
         table th {
             background-color: #f0f0f0;
             font-weight: bold;
         }
-        
+
         table td {
             text-align: center;
         }
-        
+
         .conclusion {
-            margin-top: 30px;
+            margin-top: 25px;
             margin-bottom: 20px;
             font-size: 14px;
+            line-height: 2;
         }
-        
+
         .bank-details {
-            margin-top: 30px;
+            margin-top: 25px;
             margin-bottom: 20px;
             font-size: 14px;
+            line-height: 2;
         }
-        
+
         .bank-details p {
-            margin-bottom: 5px;
-            line-height: 1.8;
+            margin-bottom: 3px;
         }
-        
+
         .closing {
-            margin-top: 30px;
+            margin-top: 25px;
             margin-bottom: 20px;
             font-size: 14px;
             text-align: right;
+            line-height: 2;
         }
-        
+
         .signature {
-            margin-top: 50px;
+            margin-top: 40px;
             text-align: right;
             font-size: 14px;
             font-weight: bold;
         }
-        
+
         @media print {
             body {
-                padding: 20px;
+                padding: 20px 40px;
             }
-            
+
             .no-print {
                 display: none;
             }
-            
+
             @page {
                 margin: 2cm;
             }
         }
-        
+
         .print-button {
             position: fixed;
             top: 20px;
@@ -145,7 +146,7 @@
             font-size: 14px;
             z-index: 1000;
         }
-        
+
         .print-button:hover {
             background-color: #333;
         }
@@ -153,54 +154,47 @@
 </head>
 <body>
     <button onclick="window.print()" class="print-button no-print">🖨️ طباعة</button>
-    
+
     <div class="container">
-        <div class="header">
-            <div class="date-line">
-                {{ \Carbon\Carbon::now()->format('Y/m/d') }} م / 
-                @php
-                    // Simple Hijri date conversion (approximate)
-                    $hijriYear = \Carbon\Carbon::now()->year - 579;
-                    $hijriMonth = \Carbon\Carbon::now()->month;
-                    $hijriDay = \Carbon\Carbon::now()->day;
-                    // Adjust for Hijri calendar differences
-                    if ($hijriMonth <= 2) {
-                        $hijriYear--;
-                    }
-                    $hijriMonths = ['محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الثانية', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'];
-                    $hijriMonthName = $hijriMonths[($hijriMonth - 1) % 12];
-                @endphp
-                {{ $hijriYear }}/{{ str_pad($hijriMonth, 2, '0', STR_PAD_LEFT) }}/{{ str_pad($hijriDay, 2, '0', STR_PAD_LEFT) }} هـ
-            </div>
-            
-            <div class="recipient">
-                السادة : {{ $payment->contract->client->name }} المحترمين
-            </div>
-            
-            <div class="subject">
-                الموضوع: مطالبة مالية إيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) - {{ $payment->contract->building->name ?? 'غير محدد' }}
-            </div>
-            
-            <div class="greeting">
-                السلام عليكم ورحمة الله وبركاته....
-            </div>
+        <div class="date-line">
+            {{ \Carbon\Carbon::now()->format('Y/m/d') }} م /
+            @php
+                // Simple Hijri date conversion (approximate)
+                $hijriYear = \Carbon\Carbon::now()->year - 579;
+                $hijriMonth = \Carbon\Carbon::now()->month;
+                $hijriDay = \Carbon\Carbon::now()->day;
+                // Adjust for Hijri calendar differences
+                if ($hijriMonth <= 2) {
+                    $hijriYear--;
+                }
+            @endphp
+            {{ $hijriYear }}/{{ str_pad($hijriMonth, 2, '0', STR_PAD_LEFT) }}/{{ str_pad($hijriDay, 2, '0', STR_PAD_LEFT) }} هـ
         </div>
-        
+
+        <div class="recipient">
+            السادة : {{ $payment->contract->client->name }} المحترمين
+        </div>
+
+        <div class="subject">
+            الموضوع: مطالبة مالية إيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) - {{ $payment->contract->building->name ?? 'غير محدد' }}
+        </div>
+
+        <div class="greeting">
+            السلام عليكم ورحمة الله وبركاته....
+        </div>
+
         <div class="body-text">
-            <p>
-                تحية طيبة وبعد،
-            </p>
             <p>
                 تشيرون إلى العقد رقم <strong>{{ $payment->contract->contract_number }}</strong> والمتعلق بإيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) في مبنى {{ $payment->contract->building->name ?? 'غير محدد' }}.
             </p>
             <p>
-                يرجى العلم بأن هناك مبلغ مستحق يتعين تحويله إلى حساب الشركة، علماً بأن المساحة المؤجرة الفعلية هي <strong>{{ $payment->contract->unit->area ?? 'N/A' }} متر مربع</strong>، بمعدل إيجار <strong>{{ number_format($payment->contract->annual_rent / ($payment->contract->unit->area ?? 1), 2) }} ريال</strong>.
+                يرجى العلم بأن هناك مبلغ مستحق يتعين تحويله إلى حساب الشركة، علماً بأن المساحة المؤجرة الفعلية هي <strong>{{ number_format($payment->contract->unit->area ?? 0, 0) }} متر مربع</strong>، بمعدل إيجار <strong>{{ number_format(($payment->contract->annual_rent ?? 0) / (($payment->contract->unit->area ?? 1) > 0 ? $payment->contract->unit->area : 1), 0) }} ريال</strong>.
             </p>
             <p>
                 يرفق بيان تفصيلي بالمبالغ المستحقة:
             </p>
         </div>
-        
+
         <table>
             <thead>
                 <tr>
@@ -219,18 +213,12 @@
                     $contract = $payment->contract;
                     $allPayments = $contract->rentPayments()->orderBy('due_date', 'asc')->get();
                     $paymentIndex = 1;
-                    $totalDue = 0;
-                    $totalPaid = 0;
-                    $totalRemaining = 0;
                 @endphp
                 @foreach($allPayments as $index => $rentPayment)
                 @php
                     $isPaid = $rentPayment->status === 'paid';
                     $paidAmount = $isPaid ? $rentPayment->total_value : 0;
                     $remainingAmount = $isPaid ? 0 : $rentPayment->total_value;
-                    $totalDue += $rentPayment->total_value;
-                    $totalPaid += $paidAmount;
-                    $totalRemaining += $remainingAmount;
                 @endphp
                 <tr>
                     <td>{{ $paymentIndex++ }}</td>
@@ -245,26 +233,22 @@
                 @endforeach
             </tbody>
         </table>
-        
+
         <div class="conclusion">
-            <p>
-                الرجاء التكرم وسداد المبلغ المستحق في أقرب وقت ممكن.
-            </p>
+            الرجاء التكرم وسداد المبلغ المستحق في أقرب وقت ممكن .
         </div>
-        
+
         <div class="bank-details">
             <p><strong>اسم الحساب :</strong> FAHAD NAWAF ALZEER TRADING GROUP</p>
             <p><strong>رقم الايبان :</strong> SA825500000000877300433</p>
             <p><strong>اسم البنك :</strong> البنك السعودي الفرنسي</p>
             <p><strong>كود سويفت :</strong> BSFRSARI</p>
         </div>
-        
+
         <div class="closing">
-            <p>
-                وتفضلوا بقبول فائق الاحترام والتقدير...
-            </p>
+            وتفضلوا بقبول فائق الاحترام والتقدير...
         </div>
-        
+
         <div class="signature">
             إدارة التأجير
         </div>
