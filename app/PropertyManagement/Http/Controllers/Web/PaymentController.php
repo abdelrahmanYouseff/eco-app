@@ -41,7 +41,8 @@ class PaymentController extends Controller
             'contract.client',
             'contract.unit',
             'contract.building',
-            'contract.broker'
+            'contract.broker',
+            'contract.rentPayments'
         ])->findOrFail($paymentId);
 
         return view('property_management.payments.request_payment', compact('payment'));

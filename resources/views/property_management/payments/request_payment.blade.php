@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مطالبة بدفع الإيجار</title>
+    <title>مطالبة مالية</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
         body {
             font-family: 'Arial', 'Tahoma', sans-serif;
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #000;
             background: #fff;
             padding: 40px;
@@ -28,73 +28,55 @@
         }
         
         .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #000;
-        }
-        
-        .header h1 {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .header .date {
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        
-        .section {
             margin-bottom: 30px;
         }
         
-        .section-title {
-            font-size: 18px;
+        .date-line {
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .recipient {
+            margin-bottom: 15px;
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ccc;
         }
         
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .subject {
             margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
         }
         
-        .info-item {
+        .greeting {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .body-text {
+            margin-bottom: 20px;
+            text-align: justify;
+            font-size: 14px;
+            line-height: 2;
+        }
+        
+        .body-text p {
             margin-bottom: 10px;
-        }
-        
-        .info-item.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            display: inline-block;
-            min-width: 150px;
-            margin-left: 10px;
-        }
-        
-        .info-value {
-            display: inline-block;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            margin-bottom: 30px;
+            margin: 20px 0;
+            font-size: 12px;
         }
         
         table th,
         table td {
             border: 1px solid #000;
-            padding: 10px;
-            text-align: right;
+            padding: 8px 5px;
+            text-align: center;
         }
         
         table th {
@@ -102,58 +84,39 @@
             font-weight: bold;
         }
         
-        table td.amount {
-            text-align: left;
-        }
-        
-        .total-row {
-            font-weight: bold;
-            background-color: #f9f9f9;
-        }
-        
-        .footer {
-            margin-top: 50px;
-            padding-top: 30px;
-            border-top: 2px solid #000;
-        }
-        
-        .signature-section {
-            margin-top: 40px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-        }
-        
-        .signature-box {
+        table td {
             text-align: center;
-            padding-top: 60px;
         }
         
-        .signature-line {
-            border-top: 1px solid #000;
-            margin-top: 5px;
-            padding-top: 5px;
-        }
-        
-        .notes {
+        .conclusion {
             margin-top: 30px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
         
-        .notes h3 {
-            margin-bottom: 10px;
-            font-size: 16px;
+        .bank-details {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
         
-        .notes ul {
-            margin-right: 20px;
-            list-style-type: disc;
-        }
-        
-        .notes li {
+        .bank-details p {
             margin-bottom: 5px;
+            line-height: 1.8;
+        }
+        
+        .closing {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: right;
+        }
+        
+        .signature {
+            margin-top: 50px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
         }
         
         @media print {
@@ -193,182 +156,118 @@
     
     <div class="container">
         <div class="header">
-            <h1>مطالبة بدفع الإيجار المستحق</h1>
-            <div class="date">تاريخ اليوم: {{ \Carbon\Carbon::now()->locale('ar')->format('Y-m-d') }}</div>
-        </div>
-        
-        <!-- تفاصيل العميل -->
-        <div class="section">
-            <h2 class="section-title">بيانات العميل</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">الاسم:</span>
-                    <span class="info-value">{{ $payment->contract->client->name }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">نوع العميل:</span>
-                    <span class="info-value">{{ $payment->contract->client->client_type }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">رقم الهوية / السجل التجاري:</span>
-                    <span class="info-value">{{ $payment->contract->client->id_number_or_cr }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">رقم الجوال:</span>
-                    <span class="info-value">{{ $payment->contract->client->mobile }}</span>
-                </div>
-                @if($payment->contract->client->email)
-                <div class="info-item">
-                    <span class="info-label">البريد الإلكتروني:</span>
-                    <span class="info-value">{{ $payment->contract->client->email }}</span>
-                </div>
-                @endif
-                @if($payment->contract->client->national_address)
-                <div class="info-item full-width">
-                    <span class="info-label">العنوان الوطني:</span>
-                    <span class="info-value">{{ $payment->contract->client->national_address }}</span>
-                </div>
-                @endif
-            </div>
-        </div>
-        
-        <!-- تفاصيل العقد -->
-        <div class="section">
-            <h2 class="section-title">تفاصيل العقد</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">رقم العقد:</span>
-                    <span class="info-value">{{ $payment->contract->contract_number }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">نوع العقد:</span>
-                    <span class="info-value">{{ $payment->contract->contract_type }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">المبنى:</span>
-                    <span class="info-value">{{ $payment->contract->building->name ?? 'غير محدد' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">الوحدة / المكتب:</span>
-                    <span class="info-value">{{ $payment->contract->unit->unit_number ?? 'غير محدد' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">تاريخ بداية العقد:</span>
-                    <span class="info-value">{{ $payment->contract->start_date->format('Y-m-d') }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">تاريخ نهاية العقد:</span>
-                    <span class="info-value">{{ $payment->contract->end_date->format('Y-m-d') }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">الإيجار السنوي:</span>
-                    <span class="info-value">{{ number_format($payment->contract->annual_rent, 2) }} ريال سعودي</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">دورة الدفع:</span>
-                    <span class="info-value">{{ $payment->contract->rent_cycle }} شهر</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- تفاصيل الدفعة المستحقة -->
-        <div class="section">
-            <h2 class="section-title">تفاصيل الدفعة المستحقة</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>البند</th>
-                        <th class="amount">المبلغ (ريال سعودي)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>الإيجار</td>
-                        <td class="amount">{{ number_format($payment->rent_value, 2) }}</td>
-                    </tr>
-                    @if($payment->services_value > 0)
-                    <tr>
-                        <td>الخدمات العامة</td>
-                        <td class="amount">{{ number_format($payment->services_value, 2) }}</td>
-                    </tr>
-                    @endif
-                    @if($payment->vat_value > 0)
-                    <tr>
-                        <td>ضريبة القيمة المضافة (VAT)</td>
-                        <td class="amount">{{ number_format($payment->vat_value, 2) }}</td>
-                    </tr>
-                    @endif
-                    @if($payment->fixed_amounts && $payment->fixed_amounts > 0)
-                    <tr>
-                        <td>مبالغ ثابتة</td>
-                        <td class="amount">{{ number_format($payment->fixed_amounts, 2) }}</td>
-                    </tr>
-                    @endif
-                    <tr class="total-row">
-                        <td><strong>الإجمالي المستحق</strong></td>
-                        <td class="amount"><strong>{{ number_format($payment->total_value, 2) }}</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">تاريخ الاستحقاق:</span>
-                    <span class="info-value"><strong>{{ $payment->due_date->format('Y-m-d') }}</strong></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">تاريخ إصدار المطالبة:</span>
-                    <span class="info-value">{{ $payment->issued_date ? $payment->issued_date->format('Y-m-d') : \Carbon\Carbon::now()->format('Y-m-d') }}</span>
-                </div>
+            <div class="date-line">
+                {{ \Carbon\Carbon::now()->format('Y/m/d') }} م / 
                 @php
-                    $daysOverdue = 0;
-                    if ($payment->status !== 'paid' && $payment->due_date < now()) {
-                        $daysOverdue = now()->diffInDays($payment->due_date);
+                    // Simple Hijri date conversion (approximate)
+                    $hijriYear = \Carbon\Carbon::now()->year - 579;
+                    $hijriMonth = \Carbon\Carbon::now()->month;
+                    $hijriDay = \Carbon\Carbon::now()->day;
+                    // Adjust for Hijri calendar differences
+                    if ($hijriMonth <= 2) {
+                        $hijriYear--;
                     }
+                    $hijriMonths = ['محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الثانية', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'];
+                    $hijriMonthName = $hijriMonths[($hijriMonth - 1) % 12];
                 @endphp
-                @if($daysOverdue > 0)
-                <div class="info-item full-width">
-                    <span class="info-label">أيام التأخير:</span>
-                    <span class="info-value"><strong style="color: #d00;">{{ $daysOverdue }} يوم</strong></span>
-                </div>
-                @endif
+                {{ $hijriYear }}/{{ str_pad($hijriMonth, 2, '0', STR_PAD_LEFT) }}/{{ str_pad($hijriDay, 2, '0', STR_PAD_LEFT) }} هـ
+            </div>
+            
+            <div class="recipient">
+                السادة : {{ $payment->contract->client->name }} المحترمين
+            </div>
+            
+            <div class="subject">
+                الموضوع: مطالبة مالية إيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) - {{ $payment->contract->building->name ?? 'غير محدد' }}
+            </div>
+            
+            <div class="greeting">
+                السلام عليكم ورحمة الله وبركاته....
             </div>
         </div>
         
-        <!-- ملاحظات -->
-        <div class="notes">
-            <h3>ملاحظات مهمة:</h3>
-            <ul>
-                <li>يرجى السداد في الموعد المحدد لتجنب التأخير والإجراءات القانونية.</li>
-                <li>في حالة التأخير في السداد، قد يتم تطبيق رسوم تأخير وفقاً لشروط العقد.</li>
-                <li>يرجى الاحتفاظ بهذه المطالبة كإثبات للسداد.</li>
-                <li>للاستفسار، يرجى التواصل مع إدارة المبنى.</li>
-            </ul>
+        <div class="body-text">
+            <p>
+                تحية طيبة وبعد،
+            </p>
+            <p>
+                تشيرون إلى العقد رقم <strong>{{ $payment->contract->contract_number }}</strong> والمتعلق بإيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) في مبنى {{ $payment->contract->building->name ?? 'غير محدد' }}.
+            </p>
+            <p>
+                يرجى العلم بأن هناك مبلغ مستحق يتعين تحويله إلى حساب الشركة، علماً بأن المساحة المؤجرة الفعلية هي <strong>{{ $payment->contract->unit->area ?? 'N/A' }} متر مربع</strong>، بمعدل إيجار <strong>{{ number_format($payment->contract->annual_rent / ($payment->contract->unit->area ?? 1), 2) }} ريال</strong>.
+            </p>
+            <p>
+                يرفق بيان تفصيلي بالمبالغ المستحقة:
+            </p>
         </div>
         
-        <!-- التوقيعات -->
-        <div class="footer">
-            <div class="signature-section">
-                <div class="signature-box">
-                    <div>توقيع العميل / المكلف</div>
-                    <div class="signature-line"></div>
-                    <div style="margin-top: 10px; font-size: 12px;">الاسم: {{ $payment->contract->client->name }}</div>
-                    <div style="font-size: 12px;">التاريخ: _________________</div>
-                </div>
-                <div class="signature-box">
-                    <div>توقيع مالك المبنى / الممثل</div>
-                    <div class="signature-line"></div>
-                    <div style="margin-top: 10px; font-size: 12px;">الاسم: _________________</div>
-                    <div style="font-size: 12px;">التاريخ: _________________</div>
-                </div>
-            </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>م</th>
+                    <th>بداية العقد</th>
+                    <th>مبلغ القسط الأول</th>
+                    <th>تاريخ استحقاق القسط الثاني</th>
+                    <th>مبلغ القسط الثاني</th>
+                    <th>اجمالي المستحق</th>
+                    <th>المبلغ المسدد</th>
+                    <th>المبلغ المتبقي</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $contract = $payment->contract;
+                    $allPayments = $contract->rentPayments()->orderBy('due_date', 'asc')->get();
+                    $paymentIndex = 1;
+                    $totalDue = 0;
+                    $totalPaid = 0;
+                    $totalRemaining = 0;
+                @endphp
+                @foreach($allPayments as $index => $rentPayment)
+                @php
+                    $isPaid = $rentPayment->status === 'paid';
+                    $paidAmount = $isPaid ? $rentPayment->total_value : 0;
+                    $remainingAmount = $isPaid ? 0 : $rentPayment->total_value;
+                    $totalDue += $rentPayment->total_value;
+                    $totalPaid += $paidAmount;
+                    $totalRemaining += $remainingAmount;
+                @endphp
+                <tr>
+                    <td>{{ $paymentIndex++ }}</td>
+                    <td>{{ $contract->start_date->format('Y.m.d') }}</td>
+                    <td>{{ number_format($rentPayment->rent_value, 0) }}</td>
+                    <td>{{ $rentPayment->due_date->format('Y.m.d') }}</td>
+                    <td>{{ number_format($rentPayment->rent_value, 0) }}</td>
+                    <td>{{ number_format($rentPayment->total_value, 0) }}</td>
+                    <td>{{ number_format($paidAmount, 0) }}</td>
+                    <td>{{ number_format($remainingAmount, 0) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        
+        <div class="conclusion">
+            <p>
+                الرجاء التكرم وسداد المبلغ المستحق في أقرب وقت ممكن.
+            </p>
         </div>
         
-        <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
-            <p>تم إصدار هذه المطالبة بتاريخ {{ \Carbon\Carbon::now()->locale('ar')->format('Y-m-d') }}</p>
-            <p>رقم المطالبة: PM-{{ $payment->id }}-{{ date('Ymd') }}</p>
+        <div class="bank-details">
+            <p><strong>اسم الحساب :</strong> FAHAD NAWAF ALZEER TRADING GROUP</p>
+            <p><strong>رقم الايبان :</strong> SA825500000000877300433</p>
+            <p><strong>اسم البنك :</strong> البنك السعودي الفرنسي</p>
+            <p><strong>كود سويفت :</strong> BSFRSARI</p>
+        </div>
+        
+        <div class="closing">
+            <p>
+                وتفضلوا بقبول فائق الاحترام والتقدير...
+            </p>
+        </div>
+        
+        <div class="signature">
+            إدارة التأجير
         </div>
     </div>
 </body>
 </html>
-
