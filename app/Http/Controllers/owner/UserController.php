@@ -5,14 +5,12 @@ namespace App\Http\Controllers\owner;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Company;
-use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    use LogsActivity;
     public function addNewUserView(){
         $companies = Company::all();
         return view('owner.users.add_new_user', compact('companies'));
@@ -52,12 +50,7 @@ class UserController extends Controller
         'badge_id' => Str::uuid(),
     ]);
     
-    // Log activity
-    $this->logActivity(
-        'create',
-        $user,
-        "تم إنشاء مستخدم جديد: {$user->name} (Role: {$user->role})"
-    );
+    // Activity is automatically logged by Spatie via LogsActivity trait in User model
 
     return redirect()->back()->with('success', 'User added successfully.');
 }
@@ -81,7 +74,6 @@ class UserController extends Controller
             'company_id' => 'nullable|exists:companies,id',
         ]);
 
-        $oldValues = $user->toArray();
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -90,14 +82,7 @@ class UserController extends Controller
             'company_id' => $validated['company_id'] ?? null,
         ]);
         
-        // Log activity
-        $this->logActivity(
-            'update',
-            $user,
-            "تم تحديث بيانات المستخدم: {$user->name}",
-            $oldValues,
-            $user->fresh()->toArray()
-        );
+        // Activity is automatically logged by Spatie via LogsActivity trait in User model
 
         return redirect()->route('user.list')->with('success', 'User updated successfully.');
     }
@@ -122,12 +107,7 @@ class UserController extends Controller
 
             $userName = $user->name;
             
-            // Log activity before deletion
-            $this->logActivity(
-                'delete',
-                $user,
-                "تم حذف المستخدم: {$userName}"
-            );
+            // Activity is automatically logged by Spatie via LogsActivity trait in User model
             
             $user->delete();
 

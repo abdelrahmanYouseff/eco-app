@@ -9,13 +9,11 @@ use App\PropertyManagement\Models\Invoice;
 use App\PropertyManagement\Models\ReceiptVoucher;
 use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Services\Tenants\TenantService;
-use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class TenantController extends Controller
 {
-    use LogsActivity;
     public function __construct(
         private TenantService $tenantService
     ) {}
@@ -54,12 +52,7 @@ class TenantController extends Controller
         try {
             $tenant = $this->tenantService->createTenant($validated);
 
-            // Log activity
-            $this->logActivity(
-                'create',
-                $tenant,
-                "تم إنشاء مستأجر جديد: {$tenant->name}"
-            );
+            // Activity is automatically logged by Spatie via LogsActivity trait in Client model
 
             // Check if we should return to contract creation page
             $returnTo = $request->input('return_to');
@@ -106,17 +99,9 @@ class TenantController extends Controller
         ]);
 
         try {
-            $oldValues = $tenant->toArray();
             $tenant->update($validated);
 
-            // Log activity
-            $this->logActivity(
-                'update',
-                $tenant,
-                "تم تحديث بيانات المستأجر: {$tenant->name}",
-                $oldValues,
-                $tenant->fresh()->toArray()
-            );
+            // Activity is automatically logged by Spatie via LogsActivity trait in Client model
 
             return redirect()->route('property-management.tenants.index')
                 ->with('success', 'تم تحديث بيانات المستأجر بنجاح');
@@ -135,6 +120,8 @@ class TenantController extends Controller
                 return redirect()->route('property-management.tenants.index')
                     ->with('error', 'لا يمكن حذف المستأجر لأنه مرتبط بعقود');
             }
+
+            // Activity is automatically logged by Spatie via LogsActivity trait in Client model
 
             $tenant->delete();
             return redirect()->route('property-management.tenants.index')

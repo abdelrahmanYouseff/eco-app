@@ -122,45 +122,63 @@
                                             </div>
                                         </td>
                                         <td class="align-middle">
-                                            @if($log->user)
+                                            @if($log->causer)
                                                 <div class="d-flex align-items-center">
                                                     <div class="avatar-xs bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2">
                                                         <i class="ti ti-user text-dark"></i>
                                                     </div>
                                                     <div>
-                                                        <strong>{{ $log->user->name }}</strong>
+                                                        <strong>{{ $log->causer->name }}</strong>
                                                         <br>
-                                                        <small class="text-muted">{{ $log->user->email }}</small>
+                                                        <small class="text-muted">{{ $log->causer->email }}</small>
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="text-muted">مستخدم محذوف</span>
+                                                <span class="text-muted">نظام</span>
                                             @endif
                                         </td>
                                         <td class="align-middle">
                                             @php
+                                                // Map Spatie events to Arabic labels
+                                                $eventLabels = [
+                                                    'created' => 'إنشاء',
+                                                    'updated' => 'تحديث',
+                                                    'deleted' => 'حذف',
+                                                ];
+                                                $eventLabel = $eventLabels[$log->event] ?? $log->event;
+                                                
                                                 $badgeColors = [
-                                                    'create' => 'bg-success',
-                                                    'update' => 'bg-info',
-                                                    'delete' => 'bg-danger',
+                                                    'created' => 'bg-success',
+                                                    'updated' => 'bg-info',
+                                                    'deleted' => 'bg-danger',
                                                     'view' => 'bg-primary',
                                                     'login' => 'bg-success',
                                                     'logout' => 'bg-secondary',
                                                 ];
-                                                $color = $badgeColors[$log->action] ?? 'bg-secondary';
+                                                $color = $badgeColors[$log->event] ?? 'bg-secondary';
                                             @endphp
                                             <span class="badge {{ $color }} text-white">
-                                                {{ $log->action }}
+                                                {{ $eventLabel }}
                                             </span>
                                         </td>
                                         <td class="align-middle">
-                                            @if($log->model_type)
+                                            @if($log->subject_type)
+                                                @php
+                                                    // Extract class name from full namespace
+                                                    $modelName = class_basename($log->subject_type);
+                                                    $modelLabels = [
+                                                        'User' => 'مستخدم',
+                                                        'Client' => 'مستأجر',
+                                                        'Contract' => 'عقد',
+                                                    ];
+                                                    $modelLabel = $modelLabels[$modelName] ?? $modelName;
+                                                @endphp
                                                 <span class="badge bg-dark text-white">
-                                                    {{ $log->model_type }}
+                                                    {{ $modelLabel }}
                                                 </span>
-                                                @if($log->model_id)
+                                                @if($log->subject_id)
                                                     <br>
-                                                    <small class="text-muted">ID: {{ $log->model_id }}</small>
+                                                    <small class="text-muted">ID: {{ $log->subject_id }}</small>
                                                 @endif
                                             @else
                                                 <span class="text-muted">-</span>
@@ -174,7 +192,7 @@
                                             @endif
                                         </td>
                                         <td class="align-middle">
-                                            <code class="text-primary">{{ $log->ip_address ?? '-' }}</code>
+                                            <code class="text-primary">{{ $log->properties['ip_address'] ?? ($log->properties['ip'] ?? '-') }}</code>
                                         </td>
                                     </tr>
                                     @empty

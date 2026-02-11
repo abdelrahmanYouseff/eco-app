@@ -6,12 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Building;
 use App\PropertyManagement\Models\Unit;
 use App\PropertyManagement\Services\Buildings\BuildingService;
-use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
-    use LogsActivity;
     public function __construct(
         private BuildingService $buildingService
     ) {}
@@ -145,17 +143,20 @@ class UnitController extends Controller
 
         try {
             $unit = Unit::findOrFail($id);
-            $oldValues = $unit->toArray();
             $unit = $this->buildingService->updateUnit($unit, $validated);
             
-            // Log activity
-            $this->logActivity(
-                'update',
-                $unit,
-                "تم تحديث الوحدة: {$unit->unit_number}",
-                $oldValues,
-                $unit->fresh()->toArray()
-            );
+            // Log custom activity for unit update
+            try {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($unit)
+                    ->withProperties([
+                        'ip_address' => request()->ip(),
+                    ])
+                    ->log("تم تحديث الوحدة: {$unit->unit_number}");
+            } catch (\Exception $e) {
+                // Silently fail if activity_log table doesn't exist
+            }
             
             return redirect()->route('property-management.units.index')
                 ->with('success', 'Unit updated successfully');
@@ -181,12 +182,18 @@ class UnitController extends Controller
                     ->with('error', 'Cannot delete unit with active contracts');
             }
             
-            // Log activity before deletion
-            $this->logActivity(
-                'delete',
-                $unit,
-                "تم حذف الوحدة: {$unit->unit_number}"
-            );
+            // Log custom activity for unit deletion
+            try {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($unit)
+                    ->withProperties([
+                        'ip_address' => request()->ip(),
+                    ])
+                    ->log("تم حذف الوحدة: {$unit->unit_number}");
+            } catch (\Exception $e) {
+                // Silently fail if activity_log table doesn't exist
+            }
             
             // حذف الوحدة
             $unit->delete();

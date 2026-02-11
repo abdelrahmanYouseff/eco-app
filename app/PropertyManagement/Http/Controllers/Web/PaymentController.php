@@ -6,12 +6,10 @@ use App\Http\Controllers\Controller;
 use App\PropertyManagement\Models\Contract;
 use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Services\Payments\PaymentService;
-use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
-    use LogsActivity;
     public function __construct(
         private PaymentService $paymentService
     ) {}
@@ -75,12 +73,20 @@ class PaymentController extends Controller
 
         $payment->save();
 
-        // Log activity
-        $this->logActivity(
-            'update',
-            $payment,
-            "تم تحديث دفعة الإيجار - العقد: " . ($payment->contract->contract_number ?? 'N/A')
-        );
+        // Log custom activity for payment update
+        try {
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($payment->contract)
+                ->withProperties([
+                    'ip_address' => request()->ip(),
+                    'payment_id' => $payment->id,
+                    'action' => 'update_payment',
+                ])
+                ->log("تم تحديث دفعة الإيجار - العقد: " . ($payment->contract->contract_number ?? 'N/A'));
+        } catch (\Exception $e) {
+            // Silently fail if activity_log table doesn't exist
+        }
 
         return response()->json([
             'success' => true,

@@ -10,13 +10,11 @@ use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Models\Unit;
 use App\PropertyManagement\Services\Contracts\ContractService;
 use App\PropertyManagement\Services\Payments\PaymentService;
-use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ContractController extends Controller
 {
-    use LogsActivity;
     public function __construct(
         private ContractService $contractService,
         private PaymentService $paymentService
@@ -124,12 +122,7 @@ class ContractController extends Controller
         try {
             $contract = $this->contractService->createContract($validated, []);
 
-            // Log activity
-            $this->logActivity(
-                'create',
-                $contract,
-                "تم إنشاء عقد جديد: {$contract->contract_number}"
-            );
+            // Activity is automatically logged by Spatie via LogsActivity trait in Contract model
 
             return redirect()->route('property-management.contracts.index')
                 ->with('success', 'تم إنشاء العقد بنجاح');
@@ -220,17 +213,9 @@ class ContractController extends Controller
                     ->with('error', 'لا يمكن تعديل العقد لأن التواريخ تتداخل مع عقد موجود (عقد رقم: ' . $overlappingContract->contract_number . ')');
             }
 
-            $oldValues = $contract->toArray();
             $contract->update($validated);
 
-            // Log activity
-            $this->logActivity(
-                'update',
-                $contract,
-                "تم تحديث العقد: {$contract->contract_number}",
-                $oldValues,
-                $contract->fresh()->toArray()
-            );
+            // Activity is automatically logged by Spatie via LogsActivity trait in Contract model
 
             return redirect()->route('property-management.contracts.show', $id)
                 ->with('success', 'تم تحديث العقد بنجاح');
@@ -266,12 +251,7 @@ class ContractController extends Controller
                     // Delete transactions
                     $contract->transactions()->delete();
 
-                    // Log activity before deletion
-                    $this->logActivity(
-                        'delete',
-                        $contract,
-                        "تم حذف العقد: {$contract->contract_number}"
-                    );
+                    // Activity is automatically logged by Spatie via LogsActivity trait in Contract model
 
                     // Delete contract
                     $contract->delete();
@@ -326,12 +306,20 @@ class ContractController extends Controller
 
             $result = $this->paymentService->markPaymentAsPaid($payment);
 
-            // Log activity
-            $this->logActivity(
-                'update',
-                $payment,
-                "تم تسجيل سداد دفعة - العقد: {$contract->contract_number}"
-            );
+            // Log custom activity for payment
+            try {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($contract)
+                    ->withProperties([
+                        'ip_address' => request()->ip(),
+                        'payment_id' => $payment->id,
+                        'action' => 'mark_payment_paid',
+                    ])
+                    ->log("تم تسجيل سداد دفعة - العقد: {$contract->contract_number}");
+            } catch (\Exception $e) {
+                // Silently fail if activity_log table doesn't exist
+            }
 
             return redirect()->route('property-management.contracts.show', $contractId)
                 ->with('success', "تم تسجيل السداد بنجاح! تم إنشاء الفاتورة {$result['invoice']->invoice_number} وسند القبض {$result['receipt_voucher']->receipt_number}");
@@ -367,12 +355,19 @@ class ContractController extends Controller
             $contract->contract_pdf_path = $path;
             $contract->save();
 
-            // Log activity
-            $this->logActivity(
-                'update',
-                $contract,
-                "تم رفع ملف PDF للعقد: {$contract->contract_number}"
-            );
+            // Log custom activity for PDF upload
+            try {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($contract)
+                    ->withProperties([
+                        'ip_address' => request()->ip(),
+                        'action' => 'upload_pdf',
+                    ])
+                    ->log("تم رفع ملف PDF للعقد: {$contract->contract_number}");
+            } catch (\Exception $e) {
+                // Silently fail if activity_log table doesn't exist
+            }
 
             return redirect()->route('property-management.contracts.show', $id)
                 ->with('success', 'تم رفع ملف العقد بنجاح');
@@ -460,12 +455,19 @@ class ContractController extends Controller
             $contract->contract_pdf_path = null;
             $contract->save();
 
-            // Log activity
-            $this->logActivity(
-                'update',
-                $contract,
-                "تم حذف ملف PDF للعقد: {$contract->contract_number}"
-            );
+            // Log custom activity for PDF deletion
+            try {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($contract)
+                    ->withProperties([
+                        'ip_address' => request()->ip(),
+                        'action' => 'delete_pdf',
+                    ])
+                    ->log("تم حذف ملف PDF للعقد: {$contract->contract_number}");
+            } catch (\Exception $e) {
+                // Silently fail if activity_log table doesn't exist
+            }
 
             return redirect()->route('property-management.contracts.show', $id)
                 ->with('success', 'تم حذف ملف العقد بنجاح');

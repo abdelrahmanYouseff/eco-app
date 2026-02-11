@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Contract extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'contract_number',
@@ -120,6 +122,24 @@ class Contract extends Model
     public function receiptVouchers(): HasMany
     {
         return $this->hasMany(ReceiptVoucher::class);
+    }
+
+    /**
+     * Configure activity log options for this model.
+     * This will automatically log create, update, and delete events.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['contract_number', 'contract_type', 'start_date', 'end_date', 'annual_rent', 'client_id', 'unit_id'])
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+                'created' => "تم إنشاء عقد جديد: {$this->contract_number}",
+                'updated' => "تم تحديث العقد: {$this->contract_number}",
+                'deleted' => "تم حذف العقد: {$this->contract_number}",
+                default => "إجراء على العقد: {$this->contract_number}",
+            })
+            ->useLogName('contract');
     }
 }
 

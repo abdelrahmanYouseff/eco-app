@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Owner\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Models\Activity;
 
 class LoginController extends Controller
 {
@@ -27,17 +27,17 @@ class LoginController extends Controller
             ]);
         }
 
-        // Log login activity (optional - don't fail if table doesn't exist)
+        // Log login activity using Spatie ActivityLog
         try {
-            ActivityLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'login',
-                'description' => 'User logged in',
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ])
+                ->log('تم تسجيل الدخول');
         } catch (\Exception $e) {
-            // Silently fail if activity_logs table doesn't exist
+            // Silently fail if activity_log table doesn't exist
             // This allows login to work even if migrations haven't been run
         }
 
@@ -46,18 +46,18 @@ class LoginController extends Controller
 
     public function logout()
     {
-        // Log logout activity before logging out (optional - don't fail if table doesn't exist)
+        // Log logout activity using Spatie ActivityLog
         if (Auth::check()) {
             try {
-                ActivityLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'logout',
-                    'description' => 'User logged out',
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
+                activity()
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'ip_address' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                    ])
+                    ->log('تم تسجيل الخروج');
             } catch (\Exception $e) {
-                // Silently fail if activity_logs table doesn't exist
+                // Silently fail if activity_log table doesn't exist
             }
         }
 
