@@ -134,7 +134,7 @@ class PaymentController extends Controller
 
             // Send email using Resend API directly
             $apiKey = env('RESEND_API_KEY');
-            
+
             if (!$apiKey) {
                 return response()->json([
                     'success' => false,
@@ -157,7 +157,7 @@ class PaymentController extends Controller
             $client = new \GuzzleHttp\Client($clientConfig);
 
             $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
-            $fromName = 'Fahad Nawaf Alzeer Holding';
+            $fromName = 'Alzeer Holding';
             $toEmail = $payment->contract->client->email;
             $subject = "مطالبة مالية - عقد رقم {$payment->contract->contract_number}";
 

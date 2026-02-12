@@ -31,11 +31,11 @@ class PaymentRequestEmail extends Mailable
         $clientName = $this->payment->contract->client->name ?? 'العميل';
         $unitNumber = $this->payment->contract->unit->unit_number ?? 'N/A';
         $buildingName = $this->payment->contract->building->name ?? 'غير محدد';
-        
+
         return new Envelope(
             from: new \Illuminate\Mail\Mailables\Address(
                 env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
-                'Fahad Nawaf Alzeer Holding'
+                'Alzeer Holding'
             ),
             subject: "مطالبة مالية - عقد رقم {$this->payment->contract->contract_number}",
         );
