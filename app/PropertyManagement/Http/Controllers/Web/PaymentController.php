@@ -9,6 +9,7 @@ use App\PropertyManagement\Models\Contract;
 use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Services\Payments\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
@@ -48,7 +49,15 @@ class PaymentController extends Controller
             'contract.rentPayments'
         ])->findOrFail($paymentId);
 
-        return view('property_management.payments.request_payment', compact('payment'));
+        // Get company information from settings
+        $companyInfo = [
+            'name' => Cache::get('settings.company_name', 'Alzeer Holding'),
+            'email' => Cache::get('settings.company_email', 'info@alzeer-holding.com'),
+            'phone' => Cache::get('settings.company_phone', ''),
+            'address' => Cache::get('settings.company_address', ''),
+        ];
+
+        return view('property_management.payments.request_payment', compact('payment', 'companyInfo'));
     }
 
     public function updatePayment(Request $request, $paymentId)
@@ -142,8 +151,16 @@ class PaymentController extends Controller
                 ], 500);
             }
 
+            // Get company information from settings
+            $companyInfo = [
+                'name' => Cache::get('settings.company_name', 'Alzeer Holding'),
+                'email' => Cache::get('settings.company_email', 'info@alzeer-holding.com'),
+                'phone' => Cache::get('settings.company_phone', ''),
+                'address' => Cache::get('settings.company_address', ''),
+            ];
+
             // Render the email view
-            $html = view('emails.payment_request', compact('payment'))->render();
+            $html = view('emails.payment_request', compact('payment', 'companyInfo'))->render();
 
             // Send email using Resend API directly via HTTP
             $clientConfig = [
@@ -159,7 +176,7 @@ class PaymentController extends Controller
             $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
             $fromName = 'Alzeer Holding';
             $toEmail = $payment->contract->client->email;
-            $subject = "مطالبة مالية - عقد رقم {$payment->contract->contract_number}";
+            $subject = "مطالبة بسداد قسط الإيجار - عقد رقم {$payment->contract->contract_number}";
 
             $response = $client->post('https://api.resend.com/emails', [
                 'headers' => [
@@ -206,7 +223,7 @@ class PaymentController extends Controller
                         'action' => 'send_payment_request_email',
                         'email' => $toEmail,
                     ])
-                    ->log("تم إرسال مطالبة مالية بالبريد الإلكتروني - العقد: {$payment->contract->contract_number}");
+                    ->log("تم إرسال مطالبة بسداد قسط الإيجار بالبريد الإلكتروني - العقد: {$payment->contract->contract_number}");
             } catch (\Exception $e) {
                 // Silently fail if activity_log table doesn't exist
             }
@@ -231,7 +248,7 @@ class PaymentController extends Controller
                     'client_id' => $payment && $payment->contract && $payment->contract->client ? $payment->contract->client->id : null,
                     'to_email' => $payment && $payment->contract && $payment->contract->client ? ($payment->contract->client->email ?? 'unknown') : 'unknown',
                     'from_email' => env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
-                    'subject' => "مطالبة مالية - عقد رقم {$contractNumber}",
+                    'subject' => "مطالبة بسداد قسط الإيجار - عقد رقم {$contractNumber}",
                     'status' => 'failed',
                     'error_message' => $errorMessage,
                     'sent_by' => auth()->id(),
@@ -256,7 +273,7 @@ class PaymentController extends Controller
                         'client_id' => $payment->contract && $payment->contract->client ? $payment->contract->client->id : null,
                         'to_email' => $payment->contract && $payment->contract->client ? ($payment->contract->client->email ?? 'unknown') : 'unknown',
                         'from_email' => env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
-                        'subject' => "مطالبة مالية - عقد رقم {$contractNumber}",
+                        'subject' => "مطالبة بسداد قسط الإيجار - عقد رقم {$contractNumber}",
                         'status' => 'failed',
                         'error_message' => $e->getMessage(),
                         'sent_by' => auth()->id(),

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مطالبة مالية</title>
+    <title>مطالبة بسداد قسط الإيجار</title>
     <style>
         * {
             margin: 0;
@@ -37,7 +37,7 @@
         }
 
         .logo-container img {
-            max-height: 80px;
+            max-height: 120px;
             width: auto;
         }
 
@@ -80,7 +80,7 @@
 
         .greeting {
             margin-bottom: 20px;
-            font-size: 16px;
+            font-size: 20px;
             text-align: center;
             font-weight: bold;
         }
@@ -152,6 +152,96 @@
             text-align: left;
             font-size: 14px;
             font-weight: bold;
+        }
+
+        .signatures-section {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .signature-box {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .signature-box h4 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: right;
+            direction: rtl;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 60px;
+            padding-top: 5px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .company-info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            direction: rtl;
+        }
+
+        .company-info h4 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .company-info p {
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .company-info strong {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .footer-info {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 8px 15px;
+            font-size: 10px;
+            text-align: center;
+            direction: rtl;
+            z-index: 1000;
+            display: block;
+            width: 100%;
+        }
+
+        .footer-info span {
+            display: inline-block;
+            margin: 0 15px;
+            color: #6c757d;
+            white-space: nowrap;
+        }
+
+        .footer-info span:not(:last-child)::after {
+            content: " | ";
+            margin: 0 5px;
+            color: #adb5bd;
+        }
+
+        @media print {
+            .footer-info {
+                position: relative;
+            }
         }
 
         @media print {
@@ -518,7 +608,7 @@
         </div>
 
         <div class="subject">
-            الموضوع: مطالبة مالية إيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) - {{ $payment->contract->building->name ?? 'غير محدد' }}
+            الموضوع: مطالبة بسداد قسط الإيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) - {{ $payment->contract->building->name ?? 'غير محدد' }}
         </div>
 
         <div class="greeting">
@@ -527,13 +617,10 @@
 
         <div class="body-text">
             <p>
-                بالاشارة إلى العقد رقم <strong>{{ $payment->contract->contract_number }}</strong> والمتعلق بإيجار {{ $payment->contract->unit->unit_type ?? 'وحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) في مبنى {{ $payment->contract->building->name ?? 'غير محدد' }}.
+                إشارةً إلى عقد الإيجار رقم (<strong>{{ $payment->contract->contract_number }}</strong>) الخاص بـ{{ $payment->contract->unit->unit_type ?? 'الوحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) في مبنى {{ $payment->contract->building->name ?? 'غير محدد' }}.
             </p>
             <p>
-                يرجى العلم بأن هناك مبلغ مستحق يتعين تحويله إلى حساب الشركة، علماً بأن المساحة المؤجرة الفعلية هي <strong>{{ number_format($payment->contract->unit->area ?? 0, 0) }} متر مربع</strong>، بمعدل إيجار <strong>{{ number_format(($payment->contract->annual_rent ?? 0) / (($payment->contract->unit->area ?? 1) > 0 ? $payment->contract->unit->area : 1), 0) }} ريال</strong>.
-            </p>
-            <p>
-                يرفق بيان تفصيلي بالمبالغ المستحقة:
+                نود إفادتكم بوجود مبلغ مستحق السداد لصالح الشركة وفق بيان المستحقات الموضح أدناه:
             </p>
         </div>
 
@@ -585,9 +672,13 @@
             وتفضلوا بقبول فائق الاحترام والتقدير...
         </div>
 
-        <div class="signature">
-            إدارة التأجير
-        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="footer-info">
+        <span>{{ !empty($companyInfo['name']) ? $companyInfo['name'] : 'Alzeer Holding' }}</span>
+        <span><strong>رقم الهاتف:</strong> {{ !empty($companyInfo['phone']) ? $companyInfo['phone'] : '0551268748' }}</span>
+        <span><strong>البريد الإلكتروني:</strong> {{ !empty($companyInfo['email']) ? $companyInfo['email'] : 'info@alzeer-holding.com' }}</span>
     </div>
 
     @if($payment->contract->client->email)
