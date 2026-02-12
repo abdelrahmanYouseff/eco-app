@@ -35,7 +35,7 @@ class PaymentRequestEmail extends Mailable
         return new Envelope(
             from: new \Illuminate\Mail\Mailables\Address(
                 env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
-                'إدارة التأجير'
+                'Fahad Nawaf Alzeer Holding'
             ),
             subject: "مطالبة مالية - عقد رقم {$this->payment->contract->contract_number}",
         );

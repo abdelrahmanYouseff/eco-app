@@ -157,6 +157,7 @@ class PaymentController extends Controller
             $client = new \GuzzleHttp\Client($clientConfig);
 
             $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
+            $fromName = 'Fahad Nawaf Alzeer Holding';
             $toEmail = $payment->contract->client->email;
             $subject = "مطالبة مالية - عقد رقم {$payment->contract->contract_number}";
 
@@ -167,7 +168,7 @@ class PaymentController extends Controller
                     'Accept' => 'application/json',
                 ],
                 'json' => [
-                    'from' => $fromEmail,
+                    'from' => $fromName . ' <' . $fromEmail . '>',
                     'to' => [$toEmail],
                     'subject' => $subject,
                     'html' => $html,
