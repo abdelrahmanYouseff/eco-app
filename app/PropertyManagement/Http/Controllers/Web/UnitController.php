@@ -93,7 +93,7 @@ class UnitController extends Controller
         $validated = $request->validate([
             'building_id' => 'required|exists:buildings,id',
             'unit_number' => 'required|string',
-            'floor_number.*required|string',
+            'floor_number' => 'required|string',
             'unit_type' => 'required|in:مكتب,شقة,محل',
             'area' => 'required|numeric|min:0',
             'direction' => 'nullable|string',
@@ -152,7 +152,7 @@ class UnitController extends Controller
         $validated = $request->validate([
             'building_id' => 'required|exists:buildings,id',
             'unit_number' => 'required|string',
-            'floor_number.*required|string',
+            'floor_number' => 'required|string',
             'unit_type' => 'required|in:مكتب,شقة,محل',
             'area' => 'required|numeric|min:0',
             'direction' => 'nullable|string',
