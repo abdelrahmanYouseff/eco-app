@@ -42,8 +42,8 @@ class PaymentRepository implements PaymentRepositoryInterface
     public function getPendingRentPayments(): Collection
     {
         return RentPayment::whereIn('status', ['unpaid', 'partially_paid'])
-            ->where('due_date', '>=', now()->toDateString())
             ->with('contract')
+            ->orderBy('due_date', 'asc')
             ->get();
     }
 
