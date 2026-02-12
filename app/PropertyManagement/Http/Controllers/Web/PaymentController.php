@@ -46,19 +46,19 @@ class PaymentController extends Controller
             $query->where('due_date', '<=', $request->input('date_to'));
         }
 
-        // Filter by company (from companies table)
+        // Filter by company (from clients table where client_type = 'شركة')
         if ($request->filled('company_id')) {
-            $query->whereHas('contract.building', function($q) use ($request) {
-                $q->whereHas('companies', function($query) use ($request) {
-                    $query->where('companies.id', $request->input('company_id'));
-                });
+            $query->whereHas('contract', function($q) use ($request) {
+                $q->where('client_id', $request->input('company_id'));
             });
         }
 
         $payments = $query->orderBy('due_date', 'asc')->paginate(20);
 
-        // Get companies for filter dropdown
-        $companies = Company::orderBy('name')->get();
+        // Get companies for filter dropdown (clients where client_type = 'شركة')
+        $companies = \App\PropertyManagement\Models\Client::where('client_type', 'شركة')
+            ->orderBy('name')
+            ->get();
 
         return view('property_management.payments.index', compact('payments', 'status', 'companies'));
     }
