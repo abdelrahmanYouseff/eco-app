@@ -620,7 +620,7 @@
                 إشارةً إلى عقد الإيجار رقم (<strong>{{ $payment->contract->contract_number }}</strong>) الخاص بـ{{ $payment->contract->unit->unit_type ?? 'الوحدة' }} رقم ({{ $payment->contract->unit->unit_number ?? 'N/A' }}) في مبنى {{ $payment->contract->building->name ?? 'غير محدد' }}.
             </p>
             <p>
-                نود إفادتكم بوجود مبلغ مستحق السداد لصالح الشركة وفق بيان المستحقات الموضح أدناه:
+                نود إفادتكم بوجود مبلغ مستحق السداد لصالح شركة فهد نواف الزير القابضة. وفق بيان المستحقات الموضح أدناه:
             </p>
         </div>
 
