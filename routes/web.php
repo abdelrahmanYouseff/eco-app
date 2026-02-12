@@ -7,6 +7,8 @@ use App\Http\Controllers\owner\ServiceController;
 use App\Http\Controllers\owner\EventController;
 use App\Http\Controllers\owner\GatesController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Mail\ReminderEmail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -112,8 +114,12 @@ Route::middleware('auth')->group(function () {
         // Payments
         Route::get('/payments', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{paymentId}/request-payment', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'requestPayment'])->name('payments.request-payment');
+        Route::post('/payments/{paymentId}/send-email', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'sendPaymentRequestEmail'])->name('payments.send-email');
         Route::get('/payments/contract/{contractId}', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'contractPayments'])->name('payments.contract');
         Route::put('/payments/{paymentId}', [\App\PropertyManagement\Http\Controllers\Web\PaymentController::class, 'updatePayment'])->name('payments.update');
+
+        // Email Logs
+        Route::get('/email-logs', [\App\PropertyManagement\Http\Controllers\Web\EmailLogController::class, 'index'])->name('email-logs.index');
 
         // Invoices
         Route::get('/invoices', [\App\PropertyManagement\Http\Controllers\Web\InvoiceController::class, 'index'])->name('invoices.index');
@@ -170,3 +176,94 @@ Route::get('/webhook/requests', [WebhookController::class, 'show'])->name('webho
 Route::get('/services/request', function () {
     return view('maintenance.request');
 })->name('maintenance.request');
+
+// Test Email Route (for testing Resend email service)
+Route::get('/test-email', function () {
+    try {
+        $apiKey = env('RESEND_API_KEY');
+        
+        if (!$apiKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'RESEND_API_KEY is not set in .env file'
+            ], 500);
+        }
+        
+        // Render the email view
+        $html = view('emails.reminder')->render();
+        
+        // Send email using Resend API directly via HTTP
+        // Configure Guzzle with proper timeouts and SSL settings
+        $clientConfig = [
+            'timeout' => 30,
+            'connect_timeout' => 10,
+            'verify' => env('RESEND_VERIFY_SSL', true), // Verify SSL certificates
+            'allow_redirects' => true,
+            'http_errors' => true,
+        ];
+        
+        $client = new \GuzzleHttp\Client($clientConfig);
+        
+        // Use custom from email from env, or use verified domain email
+        // If domain is verified, use email from that domain to send to any recipient
+        $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
+        
+        // Set the recipient email
+        $testEmail = env('RESEND_TEST_EMAIL', 'abdelrahman.yousef@hadaf-hq.com');
+        
+        $response = $client->post('https://api.resend.com/emails', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+            'json' => [
+                'from' => $fromEmail,
+                'to' => [$testEmail], // Use test email for testing without verified domain
+                'subject' => 'Test Email',
+                'html' => $html,
+            ],
+        ]);
+        
+        $result = json_decode($response->getBody()->getContents(), true);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Test email sent successfully to ' . $testEmail,
+            'email_id' => $result['id'] ?? null,
+            'from' => $fromEmail,
+            'to' => $testEmail,
+            'note' => $fromEmail === 'onboarding@resend.dev' 
+                ? 'Using onboarding email. To send to other recipients, verify your domain and set RESEND_FROM_EMAIL in .env'
+                : 'Using verified domain email. You can send to any recipient.'
+        ]);
+    } catch (\GuzzleHttp\Exception\ConnectException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Network connection error: Could not connect to Resend API. Please check your internet connection.',
+            'error' => $e->getMessage(),
+            'suggestion' => 'Make sure your server has internet access and can resolve api.resend.com'
+        ], 500);
+    } catch (\GuzzleHttp\Exception\ClientException $e) {
+        $response = $e->getResponse();
+        $errorBody = $response ? json_decode($response->getBody()->getContents(), true) : null;
+        $errorMessage = $errorBody['message'] ?? $e->getMessage();
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send email: ' . $errorMessage,
+            'error_details' => $errorBody ?? null
+        ], 500);
+    } catch (\GuzzleHttp\Exception\RequestException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Request error: ' . $e->getMessage(),
+            'suggestion' => 'Please check your internet connection and Resend API availability'
+        ], 500);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send email: ' . $e->getMessage()
+        ], 500);
+    }
+})->name('test.email');

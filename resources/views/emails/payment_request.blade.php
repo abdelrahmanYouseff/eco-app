@@ -131,53 +131,9 @@
             font-size: 14px;
             font-weight: bold;
         }
-
-        @media print {
-            body {
-                padding: 20px 40px;
-            }
-
-            .no-print {
-                display: none;
-            }
-
-            @page {
-                margin: 2cm;
-            }
-        }
-
-        .print-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background-color: #000;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            z-index: 1000;
-        }
-
-        .print-button:hover {
-            background-color: #333;
-        }
     </style>
 </head>
 <body>
-    <div class="no-print" style="position: fixed; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 10px;">
-        <button onclick="window.print()" class="print-button">🖨️ طباعة</button>
-        @if($payment->contract->client->email)
-        <button onclick="sendPaymentEmail()" class="print-button" id="sendEmailBtn" style="background-color: #28a745;">
-            📧 إرسال بالبريد الإلكتروني
-        </button>
-        @else
-        <button disabled class="print-button" style="background-color: #6c757d; cursor: not-allowed;" title="لا يوجد بريد إلكتروني مسجل للعميل">
-            📧 إرسال بالبريد الإلكتروني (غير متوفر)
-        </button>
-        @endif
-    </div>
-
     <div class="container">
         <div class="date-line">
             @php
@@ -276,67 +232,5 @@
             إدارة التأجير
         </div>
     </div>
-
-    @if($payment->contract->client->email)
-    <script>
-        function sendPaymentEmail() {
-            const btn = document.getElementById('sendEmailBtn');
-            const originalText = btn.innerHTML;
-
-            // Disable button and show loading
-            btn.disabled = true;
-            btn.innerHTML = '⏳ جاري الإرسال...';
-            btn.style.backgroundColor = '#6c757d';
-
-            fetch('{{ route("property-management.payments.send-email", $payment->id) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    btn.innerHTML = '✅ تم الإرسال بنجاح';
-                    btn.style.backgroundColor = '#28a745';
-                    alert('تم إرسال المطالبة المالية بنجاح إلى: ' + '{{ $payment->contract->client->email }}');
-
-                    // Reset button after 3 seconds
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.innerHTML = originalText;
-                        btn.style.backgroundColor = '#28a745';
-                    }, 3000);
-                } else {
-                    btn.innerHTML = '❌ فشل الإرسال';
-                    btn.style.backgroundColor = '#dc3545';
-                    alert('فشل إرسال البريد: ' + (data.message || 'حدث خطأ'));
-
-                    // Reset button after 3 seconds
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.innerHTML = originalText;
-                        btn.style.backgroundColor = '#28a745';
-                    }, 3000);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                btn.innerHTML = '❌ خطأ في الاتصال';
-                btn.style.backgroundColor = '#dc3545';
-                alert('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
-
-                // Reset button after 3 seconds
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                    btn.style.backgroundColor = '#28a745';
-                }, 3000);
-            });
-        }
-    </script>
-    @endif
 </body>
 </html>
