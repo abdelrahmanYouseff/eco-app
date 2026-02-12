@@ -157,10 +157,38 @@
             cursor: pointer;
             font-size: 14px;
             z-index: 1000;
+            border-radius: 6px;
+            transition: all 0.3s ease;
         }
 
         .print-button:hover {
             background-color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #fff;
         }
 
         /* Success Modal Styles */
@@ -393,6 +421,11 @@
 <body>
     <div class="no-print" style="position: fixed; top: 20px; left: 20px; z-index: 1000; display: flex; gap: 10px;">
         <button onclick="window.print()" class="print-button">🖨️ طباعة</button>
+        <a href="{{ url()->previous() !== url()->current() && url()->previous() !== route('login') ? url()->previous() : route('property-management.payments.index') }}"
+           class="back-button">
+            ← رجوع
+        </a>
+    </div>
 
     <!-- Success Modal -->
     <div id="successModal" class="success-modal">
