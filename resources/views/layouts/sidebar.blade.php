@@ -60,6 +60,20 @@
                 <span class="pc-mtext">المستأجرون</span>
               </a>
             </li>
+            @if(auth()->user()->role === 'editor')
+            <li class="pc-item">
+              <a href="{{ route('property-management.payments.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-currency-dollar"></i></span>
+                <span class="pc-mtext">دفعات الإيجار</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.email-logs.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-mail"></i></span>
+                <span class="pc-mtext">المراسلات الإلكترونية</span>
+              </a>
+            </li>
+            @endif
             <li class="pc-item">
               <a href="{{ route('property-management.brokers.index') }}" class="pc-link">
                 <span class="pc-micon"><i class="ti ti-user-check"></i></span>
