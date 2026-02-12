@@ -383,6 +383,7 @@
                                         <th class="text-end">الإجمالي</th>
                                         <th class="text-center">الحالة</th>
                                         <th>تاريخ الدفع</th>
+                                        <th class="text-center">الإيصال</th>
                                         <th class="text-center">الإجراءات</th>
                                     </tr>
                                 </thead>
@@ -451,6 +452,19 @@
                                         <td>
                                             @if($payment->payment_date)
                                                 {{ \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d') }}
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            @if($payment->receipt_image_path)
+                                                <button type="button"
+                                                        class="btn btn-sm btn-info"
+                                                        title="عرض الإيصال"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#receiptModal{{ $payment->id }}">
+                                                    <i class="ti ti-file-image"></i> عرض الإيصال
+                                                </button>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -840,6 +854,42 @@
                         تأكيد السداد
                     </button>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+@endforeach
+
+<!-- Receipt Image Modals -->
+@foreach($contract->rentPayments->sortBy('due_date') as $payment)
+@if($payment->receipt_image_path)
+<div class="modal fade" id="receiptModal{{ $payment->id }}" tabindex="-1" aria-labelledby="receiptModalLabel{{ $payment->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="receiptModalLabel{{ $payment->id }}">
+                    <i class="ti ti-file-image me-2"></i>
+                    إيصال الدفعة - {{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}" 
+                     alt="إيصال الدفعة" 
+                     class="img-fluid"
+                     style="max-height: 70vh; border: 1px solid #dee2e6; border-radius: 8px;"
+                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\'%3Eخطأ في تحميل الصورة%3C/text%3E%3C/svg%3E';">
+            </div>
+            <div class="modal-footer">
+                <a href="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}" 
+                   class="btn btn-primary"
+                   target="_blank"
+                   download>
+                    <i class="ti ti-download me-1"></i>
+                    تحميل الإيصال
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
             </div>
         </div>
     </div>

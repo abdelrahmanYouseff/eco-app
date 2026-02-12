@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/contracts/{id}', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'update'])->name('contracts.update');
         Route::delete('/contracts/bulk-delete', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'bulkDelete'])->name('contracts.bulk-delete');
         Route::post('/contracts/{contractId}/payments/{paymentId}/mark-as-paid', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'markPaymentAsPaid'])->name('contracts.payments.mark-as-paid');
+        Route::get('/contracts/{id}/payments/{paymentId}/receipt', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'viewReceipt'])->name('contracts.payments.receipt');
         Route::get('/contracts/{id}', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'show'])->name('contracts.show');
         Route::post('/contracts/{id}/upload-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'uploadPdf'])->name('contracts.upload-pdf');
         Route::get('/contracts/{id}/view-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'viewPdf'])->name('contracts.view-pdf');
@@ -181,17 +182,17 @@ Route::get('/services/request', function () {
 Route::get('/test-email', function () {
     try {
         $apiKey = env('RESEND_API_KEY');
-        
+
         if (!$apiKey) {
             return response()->json([
                 'success' => false,
                 'message' => 'RESEND_API_KEY is not set in .env file'
             ], 500);
         }
-        
+
         // Render the email view
         $html = view('emails.reminder')->render();
-        
+
         // Send email using Resend API directly via HTTP
         // Configure Guzzle with proper timeouts and SSL settings
         $clientConfig = [
@@ -201,16 +202,16 @@ Route::get('/test-email', function () {
             'allow_redirects' => true,
             'http_errors' => true,
         ];
-        
+
         $client = new \GuzzleHttp\Client($clientConfig);
-        
+
         // Use custom from email from env, or use verified domain email
         // If domain is verified, use email from that domain to send to any recipient
         $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
-        
+
         // Set the recipient email
         $testEmail = env('RESEND_TEST_EMAIL', 'abdelrahman.yousef@hadaf-hq.com');
-        
+
         $response = $client->post('https://api.resend.com/emails', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
@@ -224,16 +225,16 @@ Route::get('/test-email', function () {
                 'html' => $html,
             ],
         ]);
-        
+
         $result = json_decode($response->getBody()->getContents(), true);
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Test email sent successfully to ' . $testEmail,
             'email_id' => $result['id'] ?? null,
             'from' => $fromEmail,
             'to' => $testEmail,
-            'note' => $fromEmail === 'onboarding@resend.dev' 
+            'note' => $fromEmail === 'onboarding@resend.dev'
                 ? 'Using onboarding email. To send to other recipients, verify your domain and set RESEND_FROM_EMAIL in .env'
                 : 'Using verified domain email. You can send to any recipient.'
         ]);
@@ -248,7 +249,7 @@ Route::get('/test-email', function () {
         $response = $e->getResponse();
         $errorBody = $response ? json_decode($response->getBody()->getContents(), true) : null;
         $errorMessage = $errorBody['message'] ?? $e->getMessage();
-        
+
         return response()->json([
             'success' => false,
             'message' => 'Failed to send email: ' . $errorMessage,

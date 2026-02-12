@@ -321,8 +321,8 @@ class ContractController extends Controller
         ]);
 
         try {
-            $contract = \App\PropertyManagement\Models\Contract::findOrFail($contractId);
-            $payment = RentPayment::where('contract_id', $contractId)
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+            $payment = RentPayment::where('contract_id', $id)
                 ->where('id', $paymentId)
                 ->firstOrFail();
 
@@ -362,6 +362,39 @@ class ContractController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('property-management.contracts.show', $contractId ?? 0)
                 ->with('error', 'حدث خطأ أثناء تسجيل السداد: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * View payment receipt image
+     */
+    public function viewReceipt($id, $paymentId)
+    {
+        try {
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+            $payment = RentPayment::where('contract_id', $id)
+                ->where('id', $paymentId)
+                ->firstOrFail();
+
+            if (!$payment->receipt_image_path) {
+                abort(404, 'لا يوجد إيصال مرفق لهذه الدفعة');
+            }
+
+            $filePath = Storage::disk('public')->path($payment->receipt_image_path);
+            
+            if (!file_exists($filePath)) {
+                abort(404, 'ملف الإيصال غير موجود');
+            }
+
+            $mimeType = mime_content_type($filePath);
+            
+            return response()->file($filePath, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . basename($payment->receipt_image_path) . '"',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error viewing receipt: ' . $e->getMessage());
+            abort(404, 'حدث خطأ أثناء عرض الإيصال: ' . $e->getMessage());
         }
     }
 
