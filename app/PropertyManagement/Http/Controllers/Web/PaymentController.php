@@ -5,6 +5,7 @@ namespace App\PropertyManagement\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Mail\PaymentRequestEmail;
 use App\Models\Building;
+use App\Models\Company;
 use App\Models\EmailLog;
 use App\PropertyManagement\Models\Contract;
 use App\PropertyManagement\Models\RentPayment;
@@ -45,45 +46,21 @@ class PaymentController extends Controller
             $query->where('due_date', '<=', $request->input('date_to'));
         }
 
-        // Filter by search (client name, contract number)
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function($q) use ($search) {
-                $q->whereHas('contract.client', function($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                          ->orWhere('mobile', 'like', "%{$search}%")
-                          ->orWhere('id_number_or_cr', 'like', "%{$search}%");
-                })->orWhereHas('contract', function($query) use ($search) {
-                    $query->where('contract_number', 'like', "%{$search}%");
+        // Filter by company (from companies table)
+        if ($request->filled('company_id')) {
+            $query->whereHas('contract.building', function($q) use ($request) {
+                $q->whereHas('companies', function($query) use ($request) {
+                    $query->where('companies.id', $request->input('company_id'));
                 });
-            });
-        }
-
-        // Filter by building
-        if ($request->filled('building_id')) {
-            $query->whereHas('contract', function($q) use ($request) {
-                $q->where('building_id', $request->input('building_id'));
-            });
-        }
-
-        // Filter by client (company)
-        if ($request->filled('client_id')) {
-            $query->whereHas('contract', function($q) use ($request) {
-                $q->where('client_id', $request->input('client_id'));
             });
         }
 
         $payments = $query->orderBy('due_date', 'asc')->paginate(20);
 
-        // Get buildings for filter dropdown
-        $buildings = Building::orderBy('name')->get();
+        // Get companies for filter dropdown
+        $companies = Company::orderBy('name')->get();
 
-        // Get clients (companies) for filter dropdown - only companies (client_type = 'شركة')
-        $clients = \App\PropertyManagement\Models\Client::where('client_type', 'شركة')
-            ->orderBy('name')
-            ->get();
-
-        return view('property_management.payments.index', compact('payments', 'status', 'buildings', 'clients'));
+        return view('property_management.payments.index', compact('payments', 'status', 'companies'));
     }
 
     public function contractPayments($contractId)

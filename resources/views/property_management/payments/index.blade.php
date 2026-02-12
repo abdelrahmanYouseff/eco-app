@@ -43,33 +43,17 @@
                                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">المبنى</label>
-                                    <select name="building_id" class="form-select">
-                                        <option value="">الكل</option>
-                                        @foreach($buildings as $building)
-                                        <option value="{{ $building->id }}" {{ request('building_id') == $building->id ? 'selected' : '' }}>
-                                            {{ $building->name }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
                                     <label class="form-label">الشركة</label>
-                                    <select name="client_id" class="form-select">
+                                    <select name="company_id" class="form-select">
                                         <option value="">الكل</option>
-                                        @foreach($clients as $client)
-                                        <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
-                                            {{ $client->name }}
+                                        @foreach($companies as $company)
+                                        <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>
+                                            {{ $company->name }}
                                         </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">بحث (اسم العميل، رقم العقد، رقم الجوال)</label>
-                                    <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="ابحث...">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">&nbsp;</label>
+                                <div class="col-md-12">
                                     <div>
                                         <button type="submit" class="btn btn-primary">
                                             <i class="ti ti-search me-1"></i> بحث
