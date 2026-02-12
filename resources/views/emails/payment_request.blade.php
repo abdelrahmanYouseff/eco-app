@@ -22,17 +22,17 @@
             direction: rtl;
             text-align: right;
         }
-        
+
         /* Ensure RTL for all email clients */
         [dir="rtl"] {
             direction: rtl !important;
             text-align: right !important;
         }
-        
+
         table {
             direction: rtl !important;
         }
-        
+
         th, td {
             text-align: right !important;
         }
@@ -171,25 +171,25 @@
             font-weight: bold;
             direction: rtl;
         }
-        
+
         /* Additional RTL support for email clients */
         .container {
             direction: rtl !important;
             text-align: right !important;
         }
-        
+
         /* Ensure proper alignment for all elements */
         div, p, span {
             direction: rtl !important;
             text-align: right !important;
         }
-        
+
         /* Center alignment for specific elements */
         .greeting, .closing {
             text-align: center !important;
             direction: rtl !important;
         }
-        
+
         /* Override any center alignment in tables */
         table th, table td {
             text-align: right !important;
@@ -254,26 +254,20 @@
             <tbody>
                 @php
                     $contract = $payment->contract;
-                    $allPayments = $contract->rentPayments()->orderBy('due_date', 'asc')->get();
-                    $paymentIndex = 1;
-                @endphp
-                @foreach($allPayments as $index => $rentPayment)
-                @php
-                    $isPaid = $rentPayment->status === 'paid';
-                    $paidAmount = $isPaid ? $rentPayment->total_value : 0;
-                    $remainingAmount = $isPaid ? 0 : $rentPayment->total_value;
+                    $isPaid = $payment->status === 'paid';
+                    $paidAmount = $isPaid ? $payment->total_value : 0;
+                    $remainingAmount = $isPaid ? 0 : $payment->total_value;
                 @endphp
                 <tr>
-                    <td>{{ $paymentIndex++ }}</td>
+                    <td>1</td>
                     <td>{{ $contract->start_date->format('Y.m.d') }}</td>
-                    <td>{{ number_format($rentPayment->rent_value, 0) }}</td>
-                    <td>{{ $rentPayment->due_date->format('Y.m.d') }}</td>
-                    <td>{{ number_format($rentPayment->rent_value, 0) }}</td>
-                    <td>{{ number_format($rentPayment->total_value, 0) }}</td>
+                    <td>{{ number_format($payment->rent_value, 0) }}</td>
+                    <td>{{ $payment->due_date->format('Y.m.d') }}</td>
+                    <td>{{ number_format($payment->rent_value, 0) }}</td>
+                    <td>{{ number_format($payment->total_value, 0) }}</td>
                     <td>{{ number_format($paidAmount, 0) }}</td>
                     <td>{{ number_format($remainingAmount, 0) }}</td>
                 </tr>
-                @endforeach
             </tbody>
         </table>
 
