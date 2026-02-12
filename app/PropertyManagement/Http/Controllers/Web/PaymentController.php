@@ -4,6 +4,7 @@ namespace App\PropertyManagement\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Mail\PaymentRequestEmail;
+use App\Models\Building;
 use App\Models\EmailLog;
 use App\PropertyManagement\Models\Contract;
 use App\PropertyManagement\Models\RentPayment;
@@ -20,15 +21,57 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $type = $request->input('type', 'pending');
+        $query = RentPayment::with(['contract.client', 'contract.unit', 'contract.building']);
 
-        if ($type === 'overdue') {
-            $payments = $this->paymentService->getOverduePayments();
+        // Filter by status
+        $status = $request->input('status', 'unpaid');
+        if ($status === 'all') {
+            // Show all payments
+        } elseif ($status === 'paid') {
+            $query->where('status', 'paid');
+        } elseif ($status === 'overdue') {
+            $query->whereIn('status', ['unpaid', 'partially_paid'])
+                  ->where('due_date', '<', now()->toDateString());
         } else {
-            $payments = $this->paymentService->getPendingPayments();
+            // unpaid or partially_paid
+            $query->whereIn('status', ['unpaid', 'partially_paid']);
         }
 
-        return view('property_management.payments.index', compact('payments', 'type'));
+        // Filter by date range (due date)
+        if ($request->filled('date_from')) {
+            $query->where('due_date', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->where('due_date', '<=', $request->input('date_to'));
+        }
+
+        // Filter by search (client name, contract number)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->whereHas('contract.client', function($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                          ->orWhere('mobile', 'like', "%{$search}%")
+                          ->orWhere('id_number_or_cr', 'like', "%{$search}%");
+                })->orWhereHas('contract', function($query) use ($search) {
+                    $query->where('contract_number', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Filter by building
+        if ($request->filled('building_id')) {
+            $query->whereHas('contract', function($q) use ($request) {
+                $q->where('building_id', $request->input('building_id'));
+            });
+        }
+
+        $payments = $query->orderBy('due_date', 'asc')->paginate(20);
+
+        // Get buildings for filter dropdown
+        $buildings = Building::orderBy('name')->get();
+
+        return view('property_management.payments.index', compact('payments', 'status', 'buildings'));
     }
 
     public function contractPayments($contractId)

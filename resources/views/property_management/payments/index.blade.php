@@ -19,9 +19,58 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>قائمة الدفعات - {{ $type == 'all' ? 'الكل' : ($type == 'paid' ? 'المدفوعة' : ($type == 'unpaid' ? 'غير المدفوعة' : 'المدفوعة جزئياً')) }}</h5>
+                        <h5>قائمة الدفعات</h5>
                     </div>
                     <div class="card-body">
+                        <!-- Filters -->
+                        <form method="GET" action="{{ route('property-management.payments.index') }}" class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">الحالة</label>
+                                    <select name="status" class="form-select">
+                                        <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>الكل</option>
+                                        <option value="unpaid" {{ request('status') == 'unpaid' || (!request('status') && $status == 'unpaid') ? 'selected' : '' }}>غير مدفوعة</option>
+                                        <option value="overdue" {{ request('status') == 'overdue' ? 'selected' : '' }}>متأخرة</option>
+                                        <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>مدفوعة</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">من تاريخ</label>
+                                    <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">إلى تاريخ</label>
+                                    <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">المبنى</label>
+                                    <select name="building_id" class="form-select">
+                                        <option value="">الكل</option>
+                                        @foreach($buildings as $building)
+                                        <option value="{{ $building->id }}" {{ request('building_id') == $building->id ? 'selected' : '' }}>
+                                            {{ $building->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">بحث (اسم العميل، رقم العقد، رقم الجوال)</label>
+                                    <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="ابحث...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="ti ti-search me-1"></i> بحث
+                                        </button>
+                                        <a href="{{ route('property-management.payments.index') }}" class="btn btn-secondary">
+                                            <i class="ti ti-refresh me-1"></i> إعادة تعيين
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>
@@ -91,6 +140,11 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="mt-3">
+                            {{ $payments->links() }}
                         </div>
                     </div>
                 </div>
