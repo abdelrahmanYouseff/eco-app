@@ -66,12 +66,24 @@ class PaymentController extends Controller
             });
         }
 
+        // Filter by client (company)
+        if ($request->filled('client_id')) {
+            $query->whereHas('contract', function($q) use ($request) {
+                $q->where('client_id', $request->input('client_id'));
+            });
+        }
+
         $payments = $query->orderBy('due_date', 'asc')->paginate(20);
 
         // Get buildings for filter dropdown
         $buildings = Building::orderBy('name')->get();
 
-        return view('property_management.payments.index', compact('payments', 'status', 'buildings'));
+        // Get clients (companies) for filter dropdown - only companies (client_type = 'شركة')
+        $clients = \App\PropertyManagement\Models\Client::where('client_type', 'شركة')
+            ->orderBy('name')
+            ->get();
+
+        return view('property_management.payments.index', compact('payments', 'status', 'buildings', 'clients'));
     }
 
     public function contractPayments($contractId)

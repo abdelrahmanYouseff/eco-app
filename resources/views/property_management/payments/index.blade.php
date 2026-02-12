@@ -53,6 +53,17 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">الشركة</label>
+                                    <select name="client_id" class="form-select">
+                                        <option value="">الكل</option>
+                                        @foreach($clients as $client)
+                                        <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
+                                            {{ $client->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label">بحث (اسم العميل، رقم العقد، رقم الجوال)</label>
                                     <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="ابحث...">
