@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>مطالبة مالية</title>
     <style>
         * {
@@ -12,13 +13,28 @@
         }
 
         body {
-            font-family: 'Arial', 'Tahoma', sans-serif;
+            font-family: 'Arial', 'Tahoma', 'Segoe UI', sans-serif;
             font-size: 14px;
             line-height: 1.8;
             color: #000;
             background: #fff;
             padding: 40px 60px;
             direction: rtl;
+            text-align: right;
+        }
+        
+        /* Ensure RTL for all email clients */
+        [dir="rtl"] {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        table {
+            direction: rtl !important;
+        }
+        
+        th, td {
+            text-align: right !important;
         }
 
         .container {
@@ -33,27 +49,36 @@
             font-size: 14px;
             font-weight: normal;
             line-height: 1.6;
+            direction: rtl;
         }
 
         .hijri-date {
             display: block;
             margin-bottom: 5px;
+            direction: rtl;
+            text-align: right;
         }
 
         .gregorian-date {
             display: block;
+            direction: rtl;
+            text-align: right;
         }
 
         .recipient {
             margin-bottom: 12px;
             font-size: 15px;
             font-weight: bold;
+            text-align: right;
+            direction: rtl;
         }
 
         .subject {
             margin-bottom: 12px;
             font-size: 15px;
             font-weight: bold;
+            text-align: right;
+            direction: rtl;
         }
 
         .greeting {
@@ -61,6 +86,7 @@
             font-size: 16px;
             text-align: center;
             font-weight: bold;
+            direction: rtl;
         }
 
         .body-text {
@@ -68,11 +94,14 @@
             text-align: justify;
             font-size: 14px;
             line-height: 2.2;
+            direction: rtl;
         }
 
         .body-text p {
             margin-bottom: 12px;
             text-indent: 0;
+            text-align: right;
+            direction: rtl;
         }
 
         table {
@@ -80,23 +109,26 @@
             border-collapse: collapse;
             margin: 25px 0;
             font-size: 11px;
+            direction: rtl !important;
         }
 
         table th,
         table td {
             border: 1px solid #000;
             padding: 6px 4px;
-            text-align: center;
+            text-align: right !important;
             font-size: 11px;
+            direction: rtl !important;
         }
 
         table th {
             background-color: #f0f0f0;
             font-weight: bold;
+            text-align: right !important;
         }
 
         table td {
-            text-align: center;
+            text-align: right !important;
         }
 
         .conclusion {
@@ -104,6 +136,8 @@
             margin-bottom: 20px;
             font-size: 14px;
             line-height: 2;
+            text-align: right;
+            direction: rtl;
         }
 
         .bank-details {
@@ -111,10 +145,14 @@
             margin-bottom: 20px;
             font-size: 14px;
             line-height: 2;
+            text-align: right;
+            direction: rtl;
         }
 
         .bank-details p {
             margin-bottom: 3px;
+            text-align: right;
+            direction: rtl;
         }
 
         .closing {
@@ -123,6 +161,7 @@
             font-size: 14px;
             text-align: center;
             line-height: 2;
+            direction: rtl;
         }
 
         .signature {
@@ -130,6 +169,31 @@
             text-align: right;
             font-size: 14px;
             font-weight: bold;
+            direction: rtl;
+        }
+        
+        /* Additional RTL support for email clients */
+        .container {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        /* Ensure proper alignment for all elements */
+        div, p, span {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        /* Center alignment for specific elements */
+        .greeting, .closing {
+            text-align: center !important;
+            direction: rtl !important;
+        }
+        
+        /* Override any center alignment in tables */
+        table th, table td {
+            text-align: right !important;
+            direction: rtl !important;
         }
     </style>
 </head>
