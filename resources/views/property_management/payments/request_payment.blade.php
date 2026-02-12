@@ -121,7 +121,7 @@
             margin-top: 25px;
             margin-bottom: 20px;
             font-size: 14px;
-            text-align: right;
+            text-align: center;
             line-height: 2;
         }
 
