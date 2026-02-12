@@ -27,6 +27,28 @@
             background: #fff;
         }
 
+        .logo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .logo-container img {
+            max-height: 80px;
+            width: auto;
+        }
+
+        .logo-right {
+            order: 2;
+        }
+
+        .logo-left {
+            order: 1;
+        }
+
         .date-line {
             text-align: right;
             margin-bottom: 25px;
@@ -127,7 +149,7 @@
 
         .signature {
             margin-top: 40px;
-            text-align: right;
+            text-align: left;
             font-size: 14px;
             font-weight: bold;
         }
@@ -471,6 +493,11 @@
     </div>
 
     <div class="container">
+        <div class="logo-container">
+            <img src="{{ asset('assets/ملون.png') }}" alt="Alzeer Holding Logo" class="logo-left">
+            <img src="{{ asset('assets/ملون (16).png') }}" alt="Alzeer Holding Logo" class="logo-right">
+        </div>
+
         <div class="date-line">
             @php
                 // Simple Hijri date conversion (approximate)
