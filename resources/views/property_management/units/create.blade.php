@@ -82,14 +82,13 @@
                                     <label for="floor_number" class="form-label fw-bold">
                                         رقم الطابق <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number" 
+                                    <input type="text" 
                                            class="form-control @error('floor_number') is-invalid @enderror" 
                                            id="floor_number" 
                                            name="floor_number" 
                                            value="{{ old('floor_number') }}" 
                                            required
-                                           min="0"
-                                           placeholder="مثال: 1">
+                                           placeholder="مثال: 1 أو أرضي">
                                     @error('floor_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

@@ -16,7 +16,7 @@ class StoreUnitRequest extends FormRequest
         return [
             'building_id' => 'required|exists:buildings,id',
             'unit_number' => 'required|string',
-            'floor_number' => 'required|integer',
+            'floor_number' => 'required|string',
             'unit_type' => 'required|in:مكتب,شقة,محل',
             'area' => 'required|numeric|min:0',
             'direction' => 'nullable|string',
