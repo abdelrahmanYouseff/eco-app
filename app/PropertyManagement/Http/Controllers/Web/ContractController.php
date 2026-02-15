@@ -318,6 +318,7 @@ class ContractController extends Controller
 
         $request->validate([
             'receipt_image' => 'required|mimes:pdf|max:10240', // Max 10MB, PDF only
+            'payment_notes' => 'nullable|string|max:2000',
         ]);
 
         try {
@@ -336,8 +337,9 @@ class ContractController extends Controller
             $fileName = 'receipt_' . $contract->contract_number . '_' . $paymentId . '_' . time() . '.pdf';
             $path = $file->storeAs('receipts', $fileName, 'public');
 
-            // Update payment with receipt image path
+            // Update payment with receipt image path and notes
             $payment->receipt_image_path = $path;
+            $payment->notes = $request->input('payment_notes');
             $payment->save();
 
             $result = $this->paymentService->markPaymentAsPaid($payment);

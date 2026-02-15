@@ -384,6 +384,7 @@
                                         <th class="text-center">الحالة</th>
                                         <th>تاريخ الدفع</th>
                                         <th class="text-center">الإيصال</th>
+                                        <th>ملاحظات</th>
                                         <th class="text-center">الإجراءات</th>
                                     </tr>
                                 </thead>
@@ -465,6 +466,13 @@
                                                         data-bs-target="#receiptModal{{ $payment->id }}">
                                                     <i class="ti ti-file-image"></i> عرض الإيصال
                                                 </button>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="align-middle">
+                                            @if(!empty($payment->notes))
+                                                <span title="{{ $payment->notes }}">{{ Str::limit($payment->notes, 40) }}</span>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -841,6 +849,19 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <small class="text-muted">الحد الأقصى لحجم الملف: 10 ميجابايت (PDF فقط)</small>
+                            </div>
+                            <div class="mt-3">
+                                <label for="payment_notes{{ $payment->id }}" class="form-label">
+                                    <strong>ملاحظات</strong>
+                                </label>
+                                <textarea class="form-control @error('payment_notes') is-invalid @enderror"
+                                          id="payment_notes{{ $payment->id }}"
+                                          name="payment_notes"
+                                          rows="3"
+                                          placeholder="أضف ملاحظات عن السداد (اختياري)">{{ old('payment_notes') }}</textarea>
+                                @error('payment_notes')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>

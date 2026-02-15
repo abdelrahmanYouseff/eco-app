@@ -22,6 +22,7 @@ class RentPayment extends Model
         'status',
         'payment_date',
         'receipt_image_path',
+        'notes',
     ];
 
     protected $casts = [
