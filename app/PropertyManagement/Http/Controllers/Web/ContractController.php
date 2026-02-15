@@ -317,12 +317,12 @@ class ContractController extends Controller
         }
 
         $request->validate([
-            'receipt_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Max 5MB
+            'receipt_image' => 'required|mimes:pdf|max:10240', // Max 10MB, PDF only
         ]);
 
         try {
-            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
-            $payment = RentPayment::where('contract_id', $id)
+            $contract = \App\PropertyManagement\Models\Contract::findOrFail($contractId);
+            $payment = RentPayment::where('contract_id', $contractId)
                 ->where('id', $paymentId)
                 ->firstOrFail();
 
@@ -331,9 +331,9 @@ class ContractController extends Controller
                     ->with('warning', 'هذه الدفعة مدفوعة بالفعل');
             }
 
-            // Store receipt image
+            // Store receipt PDF
             $file = $request->file('receipt_image');
-            $fileName = 'receipt_' . $contract->contract_number . '_' . $paymentId . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $fileName = 'receipt_' . $contract->contract_number . '_' . $paymentId . '_' . time() . '.pdf';
             $path = $file->storeAs('receipts', $fileName, 'public');
 
             // Update payment with receipt image path
@@ -380,20 +380,26 @@ class ContractController extends Controller
                 abort(404, 'لا يوجد إيصال مرفق لهذه الدفعة');
             }
 
-            $filePath = Storage::disk('public')->path($payment->receipt_image_path);
-            
+            if (!Storage::disk('public')->exists($payment->receipt_image_path)) {
+                abort(404, 'ملف الإيصال غير موجود');
+            }
+
+            // Get the full file path
+            $filePath = storage_path('app/public/' . $payment->receipt_image_path);
+
             if (!file_exists($filePath)) {
                 abort(404, 'ملف الإيصال غير موجود');
             }
 
-            $mimeType = mime_content_type($filePath);
-            
+            // Determine the MIME type
+            $mimeType = mime_content_type($filePath) ?: 'application/pdf';
+
             return response()->file($filePath, [
                 'Content-Type' => $mimeType,
                 'Content-Disposition' => 'inline; filename="' . basename($payment->receipt_image_path) . '"',
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error viewing receipt: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error viewing receipt: ' . $e->getMessage());
             abort(404, 'حدث خطأ أثناء عرض الإيصال: ' . $e->getMessage());
         }
     }

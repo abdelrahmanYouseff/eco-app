@@ -230,7 +230,7 @@
                     <div class="col-md-3">
                         <div class="card bg-dark text-white">
                             <div class="card-body text-center">
-                                <h4 class="text-white">{{ number_format($contract->total_rent, 2) }}</h4>
+                                <h4 class="text-white">{{ number_format($contract->total_rent - $contract->deposit_amount, 2) }}</h4>
                                 <p class="mb-0 text-white">إجمالي الإيجار</p>
                             </div>
                         </div>
@@ -826,21 +826,21 @@
                     @csrf
                     <div class="card border-0 bg-light">
                         <div class="card-body">
-                            <h6 class="mb-3">رفع صورة الإيصال</h6>
+                            <h6 class="mb-3">رفع ملف الإيصال</h6>
                             <div class="mb-2">
                                 <label for="receipt_image{{ $payment->id }}" class="form-label">
-                                    <strong>صورة الإيصال <span class="text-danger">*</span></strong>
+                                    <strong>ملف الإيصال PDF <span class="text-danger">*</span></strong>
                                 </label>
                                 <input type="file"
                                        class="form-control @error('receipt_image') is-invalid @enderror"
                                        id="receipt_image{{ $payment->id }}"
                                        name="receipt_image"
-                                       accept="image/*"
+                                       accept=".pdf,application/pdf"
                                        required>
                                 @error('receipt_image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">الحد الأقصى لحجم الملف: 5 ميجابايت (صورة فقط: JPG, PNG, GIF)</small>
+                                <small class="text-muted">الحد الأقصى لحجم الملف: 10 ميجابايت (PDF فقط)</small>
                             </div>
                         </div>
                     </div>
@@ -869,20 +869,19 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="receiptModalLabel{{ $payment->id }}">
-                    <i class="ti ti-file-image me-2"></i>
+                    <i class="ti ti-file-pdf me-2"></i>
                     إيصال الدفعة - {{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <img src="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}" 
-                     alt="إيصال الدفعة" 
-                     class="img-fluid"
-                     style="max-height: 70vh; border: 1px solid #dee2e6; border-radius: 8px;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\'%3Eخطأ في تحميل الصورة%3C/text%3E%3C/svg%3E';">
+                <iframe src="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}"
+                        style="width: 100%; height: 70vh; border: 1px solid #dee2e6; border-radius: 8px;"
+                        frameborder="0">
+                </iframe>
             </div>
             <div class="modal-footer">
-                <a href="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}" 
+                <a href="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}"
                    class="btn btn-primary"
                    target="_blank"
                    download>
