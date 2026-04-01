@@ -117,4 +117,23 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Error deleting user: ' . $e->getMessage());
         }
     }
+
+    public function changePassword(Request $request, $id)
+    {
+        if ((int) $id === (int) auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot change your own password from here.');
+        }
+
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+        ]);
+
+        return redirect()->back()->with('success', 'Password updated successfully.');
+    }
 }
