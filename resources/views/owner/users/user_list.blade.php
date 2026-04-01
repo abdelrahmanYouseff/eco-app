@@ -36,6 +36,9 @@
   .users-table thead th { white-space: nowrap; }
   .users-table td { vertical-align: middle; }
   .users-badge code { font-size: .85rem; }
+  .stat-card { border: 1px solid rgba(0,0,0,.06); }
+  .stat-card .stat-label { font-size: .85rem; color: #6c757d; }
+  .stat-card .stat-value { font-size: 1.25rem; font-weight: 700; }
 </style>
 
 <div class="pc-container">
@@ -63,41 +66,41 @@
 
     <div class="row g-3 mb-3">
       <div class="col-md-4">
-        <div class="card mb-0">
+        <div class="card mb-0 stat-card">
           <div class="card-body d-flex align-items-center justify-content-between">
             <div>
-              <div class="text-muted">إجمالي المستخدمين</div>
-              <div class="h5 mb-0">{{ $totalUsers }}</div>
+              <div class="stat-label">إجمالي المستخدمين</div>
+              <div class="stat-value">{{ $totalUsers }}</div>
             </div>
-            <div class="avatar avatar-sm bg-light-primary">
-              <i class="ti ti-users text-primary"></i>
-            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+              <i class="ti ti-users me-1"></i> Users
+            </span>
           </div>
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card mb-0">
+        <div class="card mb-0 stat-card">
           <div class="card-body d-flex align-items-center justify-content-between">
             <div>
-              <div class="text-muted">داخل</div>
-              <div class="h5 mb-0">{{ $insideCount }}</div>
+              <div class="stat-label">داخل</div>
+              <div class="stat-value">{{ $insideCount }}</div>
             </div>
-            <div class="avatar avatar-sm bg-light-success">
-              <i class="ti ti-login text-success"></i>
-            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+              <i class="ti ti-login me-1"></i> Inside
+            </span>
           </div>
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card mb-0">
+        <div class="card mb-0 stat-card">
           <div class="card-body d-flex align-items-center justify-content-between">
             <div>
-              <div class="text-muted">خارج</div>
-              <div class="h5 mb-0">{{ $outsideCount }}</div>
+              <div class="stat-label">خارج</div>
+              <div class="stat-value">{{ $outsideCount }}</div>
             </div>
-            <div class="avatar avatar-sm bg-light-danger">
-              <i class="ti ti-logout text-danger"></i>
-            </div>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+              <i class="ti ti-logout me-1"></i> Outside
+            </span>
           </div>
         </div>
       </div>
@@ -122,11 +125,13 @@
 
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-hover mb-0 users-table">
+          <table class="table table-hover align-middle mb-0 users-table">
             <thead class="table-light">
               <tr>
                 <th style="width:80px;">ID</th>
                 <th>المستخدم</th>
+                <th class="d-none d-lg-table-cell">Email</th>
+                <th class="d-none d-xl-table-cell">Phone</th>
                 <th>الدور</th>
                 <th>Badge</th>
                 <th>الشركة</th>
@@ -140,12 +145,10 @@
                 <tr data-search="{{ strtolower(($user->name ?? '').' '.($user->email ?? '').' '.($user->phone ?? '').' '.($user->company_name ?? '')) }}">
                   <td class="text-muted">#{{ $user->id }}</td>
                   <td>
-                    <div class="d-flex flex-column">
-                      <span class="fw-semibold">{{ $user->name }}</span>
-                      <small class="text-muted">{{ $user->email }}</small>
-                      <small class="text-muted">{{ $user->phone }}</small>
-                    </div>
+                    <span class="fw-semibold">{{ $user->name }}</span>
                   </td>
+                  <td class="d-none d-lg-table-cell text-muted">{{ $user->email }}</td>
+                  <td class="d-none d-xl-table-cell text-muted">{{ $user->phone }}</td>
                   <td>
                     @if($user->role === 'building_admin')
                       <span class="badge bg-primary">Building Admin</span>
