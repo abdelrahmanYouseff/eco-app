@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\VisitorController;
 use App\Http\Controllers\Api\MaintenanceRequestController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\WebhookController;
 
 /*
@@ -31,6 +32,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/companies/{id}', [CompanyController::class, 'show']);
     Route::post('/register', [UserController::class, 'register']);
     Route::get('/companies/{companyId}/employees', [UserController::class, 'employeesByCompany']);
+
+    // Live location updates (mobile app)
+    Route::post('/locations', [LocationController::class, 'store']);
 });
 
 Route::post('/login', [AuthController::class, 'login']);

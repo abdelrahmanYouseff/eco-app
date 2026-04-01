@@ -6,6 +6,7 @@ use App\Http\Controllers\owner\UserController;
 use App\Http\Controllers\owner\ServiceController;
 use App\Http\Controllers\owner\EventController;
 use App\Http\Controllers\owner\GatesController;
+use App\Http\Controllers\owner\TrackingController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Mail\ReminderEmail;
 use Illuminate\Support\Facades\Mail;
@@ -39,6 +40,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/building/owner/dashboard', [LoginController::class, 'ownerDashboardView'])
         ->name('building.owner.dashboard');
+
+    // Live tracking (dashboard)
+    Route::get('/building/owner/tracking', [TrackingController::class, 'index'])
+        ->name('building.owner.tracking');
+    Route::get('/building/owner/tracking/api/active', [TrackingController::class, 'active'])
+        ->name('building.owner.tracking.api.active');
+    Route::get('/building/owner/tracking/api/users/{user}/latest', [TrackingController::class, 'latest'])
+        ->name('building.owner.tracking.api.users.latest');
 
     Route::get('/company/add', [CompanyController::class, 'addCompanyView'])->name('company.add');
     Route::get('/company/list', [CompanyController::class, 'CompanyList'])->name('company.list');

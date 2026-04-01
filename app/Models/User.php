@@ -55,6 +55,11 @@ class User extends Authenticatable
         return $this->hasMany(Visit::class, 'created_by_id');
     }
 
+    public function locations()
+    {
+        return $this->hasMany(UserLocation::class);
+    }
+
     /**
      * Configure activity log options for this model.
      * This will automatically log create, update, and delete events.

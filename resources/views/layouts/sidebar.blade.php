@@ -30,6 +30,18 @@
       </div>
       <div class="navbar-content">
         <ul class="pc-navbar">
+          @if (request()->is('building/owner/dashboard'))
+            <li class="pc-item pc-caption">
+              <label>التتبع</label>
+              <i class="ti ti-route"></i>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('building.owner.tracking') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-route"></i></span>
+                <span class="pc-mtext">تتبع</span>
+              </a>
+            </li>
+          @endif
           @if(auth()->user()->role === 'editor' || auth()->user()->role === 'viewer')
             {{-- Editor/Viewer Role: Only Property Management Section (Read-Only for Viewer) --}}
             <li class="pc-item pc-caption">
