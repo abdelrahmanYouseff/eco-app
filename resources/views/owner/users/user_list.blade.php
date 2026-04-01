@@ -25,106 +25,209 @@
   </script>
 @endif
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-10 ms-auto">
-            <h2 class="mb-4">User List</h2>
-            <table class="table table-bordered table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Role</th>
-                        <th>Badge ID</th>
-                        <th>Company</th>
-                        <th>Status</th>
-                        <th>Created At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($users as $user)
-                    <tr>
-                        <td>{{ $user->id }}</td>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->phone }}</td>
-                        <td>
-                            @if($user->role === 'building_admin')
-                                <span class="badge bg-primary">Building Admin</span>
-                            @elseif($user->role === 'company_admin')
-                                <span class="badge bg-success">Company Admin</span>
-                            @elseif($user->role === 'employee')
-                                <span class="badge bg-info">Employee</span>
-                            @elseif($user->role === 'visitor')
-                                <span class="badge bg-warning">Visitor</span>
-                            @elseif($user->role === 'accountant')
-                                <span class="badge bg-danger">Accountant</span>
-                            @elseif($user->role === 'editor')
-                                <span class="badge bg-dark">Editor</span>
-                            @elseif($user->role === 'viewer')
-                                <span class="badge bg-secondary">Viewer (Read Only)</span>
-                            @else
-                                <span class="badge bg-secondary">{{ $user->role }}</span>
-                            @endif
-                        </td>
-                        <td>
-                            <code class="text-primary">{{ $user->badge_id ?? 'N/A' }}</code>
-                        </td>
-                        <td>{{ $user->company_name ?? 'N/A' }}</td>
-                        <td>
-                            @if($user->is_inside)
-                                <span class="badge bg-success">
-                                    <i class="ti ti-login me-1"></i> Inside
-                                </span>
-                            @else
-                                <span class="badge bg-danger">
-                                    <i class="ti ti-logout me-1"></i> Outside
-                                </span>
-                            @endif
-                        </td>
-                        <td>{{ $user->created_at ? $user->created_at->format('Y-m-d H:i') : 'N/A' }}</td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-outline-primary"
-                                        onclick="viewUserDetails({{ $user->id }})" title="View Details">
-                                    <i class="ti ti-eye"></i>
-                                </button>
-                                <a href="{{ route('users.edit', $user->id) }}" 
-                                   class="btn btn-sm btn-outline-success" 
-                                   title="تعديل">
-                                    <i class="ti ti-edit"></i>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-outline-info"
-                                        onclick="generateQRCode('{{ $user->badge_id }}')" title="Generate QR Code">
-                                    <i class="ti ti-qrcode"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary"
-                                        onclick="copyBadgeId('{{ $user->badge_id }}')" title="Copy Badge ID">
-                                    <i class="ti ti-copy"></i>
-                                </button>
-                                @if(auth()->id() != $user->id)
-                                <button type="button" class="btn btn-sm btn-outline-warning"
-                                        onclick="changePassword({{ $user->id }}, '{{ $user->name }}')" title="تغيير كلمة المرور">
-                                    <i class="ti ti-lock"></i>
-                                </button>
-                                @endif
-                                @if(auth()->id() != $user->id)
-                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                        onclick="deleteUser({{ $user->id }}, '{{ $user->name }}')" title="Delete User">
-                                    <i class="ti ti-trash"></i>
-                                </button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+@php
+  $totalUsers = $users->count();
+  $insideCount = $users->where('is_inside', true)->count();
+  $outsideCount = $totalUsers - $insideCount;
+@endphp
+
+<style>
+  .users-search .form-control:focus { box-shadow: none; }
+  .users-table thead th { white-space: nowrap; }
+  .users-table td { vertical-align: middle; }
+  .users-badge code { font-size: .85rem; }
+</style>
+
+<div class="pc-container">
+  <div class="pc-content">
+    <div class="page-header">
+      <div class="page-block">
+        <div class="row align-items-center">
+          <div class="col">
+            <div class="page-header-title">
+              <h5 class="m-b-10">المستخدمون</h5>
+            </div>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{{ route('building.owner.dashboard') }}">لوحة التحكم</a></li>
+              <li class="breadcrumb-item" aria-current="page">قائمة المستخدمين</li>
+            </ul>
+          </div>
+          <div class="col-auto d-flex gap-2">
+            <a href="{{ route('user.add') }}" class="btn btn-primary">
+              <i class="ti ti-user-plus me-1"></i> إضافة مستخدم
+            </a>
+          </div>
         </div>
+      </div>
     </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-4">
+        <div class="card mb-0">
+          <div class="card-body d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted">إجمالي المستخدمين</div>
+              <div class="h5 mb-0">{{ $totalUsers }}</div>
+            </div>
+            <div class="avatar avatar-sm bg-light-primary">
+              <i class="ti ti-users text-primary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card mb-0">
+          <div class="card-body d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted">داخل</div>
+              <div class="h5 mb-0">{{ $insideCount }}</div>
+            </div>
+            <div class="avatar avatar-sm bg-light-success">
+              <i class="ti ti-login text-success"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card mb-0">
+          <div class="card-body d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted">خارج</div>
+              <div class="h5 mb-0">{{ $outsideCount }}</div>
+            </div>
+            <div class="avatar avatar-sm bg-light-danger">
+              <i class="ti ti-logout text-danger"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="row align-items-center g-2">
+          <div class="col">
+            <h5 class="mb-0">قائمة المستخدمين</h5>
+            <small class="text-muted">ابحث بالاسم أو الإيميل أو رقم الجوال أو الشركة</small>
+          </div>
+          <div class="col-12 col-md-5 users-search">
+            <div class="input-group">
+              <span class="input-group-text bg-transparent"><i class="ti ti-search"></i></span>
+              <input id="users-search-input" type="text" class="form-control" placeholder="بحث..." autocomplete="off">
+              <button id="users-search-clear" class="btn btn-outline-secondary" type="button">مسح</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 users-table">
+            <thead class="table-light">
+              <tr>
+                <th style="width:80px;">ID</th>
+                <th>المستخدم</th>
+                <th>الدور</th>
+                <th>Badge</th>
+                <th>الشركة</th>
+                <th>الحالة</th>
+                <th>تاريخ الإنشاء</th>
+                <th class="text-end" style="width:90px;">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              @foreach($users as $user)
+                <tr data-search="{{ strtolower(($user->name ?? '').' '.($user->email ?? '').' '.($user->phone ?? '').' '.($user->company_name ?? '')) }}">
+                  <td class="text-muted">#{{ $user->id }}</td>
+                  <td>
+                    <div class="d-flex flex-column">
+                      <span class="fw-semibold">{{ $user->name }}</span>
+                      <small class="text-muted">{{ $user->email }}</small>
+                      <small class="text-muted">{{ $user->phone }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    @if($user->role === 'building_admin')
+                      <span class="badge bg-primary">Building Admin</span>
+                    @elseif($user->role === 'company_admin')
+                      <span class="badge bg-success">Company Admin</span>
+                    @elseif($user->role === 'employee')
+                      <span class="badge bg-info">Employee</span>
+                    @elseif($user->role === 'visitor')
+                      <span class="badge bg-warning text-dark">Visitor</span>
+                    @elseif($user->role === 'accountant')
+                      <span class="badge bg-danger">Accountant</span>
+                    @elseif($user->role === 'editor')
+                      <span class="badge bg-dark">Editor</span>
+                    @elseif($user->role === 'viewer')
+                      <span class="badge bg-secondary">Viewer</span>
+                    @else
+                      <span class="badge bg-secondary">{{ $user->role }}</span>
+                    @endif
+                  </td>
+                  <td class="users-badge">
+                    <div class="d-flex align-items-center gap-2">
+                      <code class="text-primary">{{ $user->badge_id ?? 'N/A' }}</code>
+                      <button type="button" class="btn btn-sm btn-outline-secondary"
+                              onclick="copyBadgeId(event, '{{ $user->badge_id }}')" title="نسخ">
+                        <i class="ti ti-copy"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td>{{ $user->company_name ?? 'N/A' }}</td>
+                  <td>
+                    @if($user->is_inside)
+                      <span class="badge bg-success"><i class="ti ti-login me-1"></i> داخل</span>
+                    @else
+                      <span class="badge bg-danger"><i class="ti ti-logout me-1"></i> خارج</span>
+                    @endif
+                  </td>
+                  <td class="text-muted">{{ $user->created_at ? $user->created_at->format('Y-m-d H:i') : 'N/A' }}</td>
+                  <td class="text-end">
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="ti ti-dots"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <button class="dropdown-item" type="button" onclick="viewUserDetails({{ $user->id }})">
+                            <i class="ti ti-eye me-2"></i> عرض
+                          </button>
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="{{ route('users.edit', $user->id) }}">
+                            <i class="ti ti-edit me-2"></i> تعديل
+                          </a>
+                        </li>
+                        <li>
+                          <button class="dropdown-item" type="button" onclick="generateQRCode('{{ $user->badge_id }}')">
+                            <i class="ti ti-qrcode me-2"></i> QR
+                          </button>
+                        </li>
+                        @if(auth()->id() != $user->id)
+                          <li><hr class="dropdown-divider"></li>
+                          <li>
+                            <button class="dropdown-item text-warning" type="button" onclick="changePassword({{ $user->id }}, '{{ $user->name }}')">
+                              <i class="ti ti-lock me-2"></i> تغيير كلمة المرور
+                            </button>
+                          </li>
+                          <li>
+                            <button class="dropdown-item text-danger" type="button" onclick="deleteUser({{ $user->id }}, '{{ $user->name }}')">
+                              <i class="ti ti-trash me-2"></i> حذف
+                            </button>
+                          </li>
+                        @endif
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- QR Code Modal -->
@@ -230,7 +333,7 @@ function downloadQRCode() {
     link.click();
 }
 
-function copyBadgeId(badgeId) {
+function copyBadgeId(evt, badgeId) {
     if (!badgeId || badgeId === 'N/A') {
         alert('No Badge ID available for this user');
         return;
@@ -238,7 +341,8 @@ function copyBadgeId(badgeId) {
 
     navigator.clipboard.writeText(badgeId).then(function() {
         // إظهار رسالة نجاح
-        const button = event.target.closest('button');
+        const button = evt && evt.target ? evt.target.closest('button') : null;
+        if (!button) return;
         const originalHTML = button.innerHTML;
         button.innerHTML = '<i class="ti ti-check"></i>';
         button.classList.remove('btn-outline-secondary');
@@ -334,5 +438,29 @@ document.getElementById('passwordChangeForm').addEventListener('submit', functio
     // إرسال form
     this.submit();
 });
+
+// Search filter
+(function () {
+  const input = document.getElementById('users-search-input');
+  const clearBtn = document.getElementById('users-search-clear');
+  const tbody = document.getElementById('users-tbody');
+  if (!input || !clearBtn || !tbody) return;
+
+  function applyFilter() {
+    const q = (input.value || '').trim().toLowerCase();
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach((tr) => {
+      const hay = (tr.getAttribute('data-search') || '').toLowerCase();
+      tr.style.display = (!q || hay.includes(q)) ? '' : 'none';
+    });
+  }
+
+  input.addEventListener('input', applyFilter);
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    input.focus();
+    applyFilter();
+  });
+})();
 </script>
 @endpush
