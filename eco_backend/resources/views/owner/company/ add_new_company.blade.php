@@ -25,6 +25,16 @@
         </div>
 
         <div class="mb-3">
+          <label for="email" class="form-label">Company Email</label>
+          <input type="email" name="email" id="email" class="form-control" placeholder="Enter company email" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="phone" class="form-label">Company Phone</label>
+          <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter company phone" required>
+        </div>
+
+        <div class="mb-3">
           <label for="floor_number" class="form-label">Floor Number</label>
           <input type="text" name="floor_number" id="floor_number" class="form-control" placeholder="Enter floor number" required>
         </div>

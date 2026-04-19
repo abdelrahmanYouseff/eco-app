@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 
 class EmployeeUserSeeder extends Seeder
@@ -26,7 +27,7 @@ class EmployeeUserSeeder extends Seeder
                 'role' => 'employee',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-                'badge_id' => '123456', // أو أي قيمة مناسبة
+                'badge_id' => Str::uuid(),
             ],
         ]);
     }

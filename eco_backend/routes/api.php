@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\VisitorController;
 use App\Http\Controllers\Api\MaintenanceRequestController;
+use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,12 +32,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/companies/{id}', [CompanyController::class, 'show']);
     Route::post('/register', [UserController::class, 'register']);
     Route::get('/companies/{companyId}/employees', [UserController::class, 'employeesByCompany']);
+
+    // Live location updates (mobile app)
+    Route::post('/locations', [LocationController::class, 'store']);
 });
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/open-gate', [GateController::class, 'open']);
+Route::post('/gate', [GateController::class, 'gate']);
 
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::post('/visitors', [VisitorController::class, 'store']);
 Route::get('/visitors/by-user-company/{userId}', [VisitorController::class, 'getVisitorsByUserCompany']);
-Route::post('/maintenance-requests', [MaintenanceRequestController::class, 'store']);
+
+// Maintenance requests - require authentication
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/maintenance-requests', [MaintenanceRequestController::class, 'store']);
+    Route::get('/maintenance-requests', [MaintenanceRequestController::class, 'index']);
+});
+
+// Webhook routes
+Route::post('/webhook', [WebhookController::class, 'receive']);
+Route::get('/webhook/requests', [WebhookController::class, 'show']);
+Route::delete('/webhook/clear', [WebhookController::class, 'clear']);

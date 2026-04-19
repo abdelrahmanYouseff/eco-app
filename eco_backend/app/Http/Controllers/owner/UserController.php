@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\owner;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Company;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-
-
 
 class UserController extends Controller
 {
@@ -42,7 +40,7 @@ class UserController extends Controller
         'company_id' => 'nullable|exists:companies,id', // هنا نخليها nullable
     ]);
 
-    User::create([
+    $user = User::create([
         'name' => $validated['name'],
         'email' => $validated['email'],
         'phone' => $validated['phone_number'],
@@ -51,9 +49,43 @@ class UserController extends Controller
         'company_id' => $validated['company_id'] ?? null, // default لو null
         'badge_id' => Str::uuid(),
     ]);
+    
+    // Activity is automatically logged by Spatie via LogsActivity trait in User model
 
     return redirect()->back()->with('success', 'User added successfully.');
 }
+
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+        $companies = Company::all();
+        return view('owner.users.edit_user', compact('user', 'companies'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'phone_number' => 'required|string|max:20',
+            'role' => 'required|string|in:building_admin,company_admin,employee,visitor,accountant,editor',
+            'company_id' => 'nullable|exists:companies,id',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone_number'],
+            'role' => $validated['role'],
+            'company_id' => $validated['company_id'] ?? null,
+        ]);
+        
+        // Activity is automatically logged by Spatie via LogsActivity trait in User model
+
+        return redirect()->route('user.list')->with('success', 'User updated successfully.');
+    }
 
     public function destroy($id)
     {
@@ -66,7 +98,7 @@ class UserController extends Controller
             }
 
             // منع حذف آخر building admin
-            if ($user->role === 'building_admin') {
+            if ($user->role === 'building_admin' || $user->role === 'accountant') {
                 $buildingAdminsCount = User::where('role', 'building_admin')->count();
                 if ($buildingAdminsCount <= 1) {
                     return redirect()->back()->with('error', 'Cannot delete the last building admin.');
@@ -74,6 +106,9 @@ class UserController extends Controller
             }
 
             $userName = $user->name;
+            
+            // Activity is automatically logged by Spatie via LogsActivity trait in User model
+            
             $user->delete();
 
             return redirect()->back()->with('success', "User '{$userName}' has been deleted successfully.");
@@ -81,5 +116,24 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error deleting user: ' . $e->getMessage());
         }
+    }
+
+    public function changePassword(Request $request, $id)
+    {
+        if ((int) $id === (int) auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot change your own password from here.');
+        }
+
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+        ]);
+
+        return redirect()->back()->with('success', 'Password updated successfully.');
     }
 }
