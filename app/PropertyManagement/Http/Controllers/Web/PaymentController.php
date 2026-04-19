@@ -89,7 +89,10 @@ class PaymentController extends Controller
             'address' => Cache::get('settings.company_address', ''),
         ];
 
-        return view('property_management.payments.request_payment', compact('payment', 'companyInfo'));
+        return view(
+            'property_management.payments.request_payment',
+            array_merge($this->buildPaymentRequestViewData($payment), ['companyInfo' => $companyInfo])
+        );
     }
 
     public function updatePayment(Request $request, $paymentId)
@@ -192,7 +195,10 @@ class PaymentController extends Controller
             ];
 
             // Render the email view
-            $html = view('emails.payment_request', compact('payment', 'companyInfo'))->render();
+            $html = view(
+                'emails.payment_request',
+                array_merge($this->buildPaymentRequestViewData($payment), ['companyInfo' => $companyInfo])
+            )->render();
 
             // Send email using Resend API directly via HTTP
             $clientConfig = [
@@ -320,6 +326,28 @@ class PaymentController extends Controller
                 'message' => 'حدث خطأ: ' . $e->getMessage()
             ], 500);
         }
+    }
+    private function buildPaymentRequestViewData(RentPayment $payment): array
+    {
+        $payment->loadMissing([
+            'contract.client',
+            'contract.unit',
+            'contract.building',
+            'contract.broker',
+            'contract.rentPayments',
+        ]);
+
+        $paidPayments = $payment->contract->rentPayments
+            ->where('status', 'paid')
+            ->where('id', '!=', $payment->id)
+            ->sortBy('due_date')
+            ->values();
+
+        return [
+            'payment' => $payment,
+            'duePayment' => $payment,
+            'paidPayments' => $paidPayments,
+        ];
     }
 }
 

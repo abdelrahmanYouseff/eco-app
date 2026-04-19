@@ -121,6 +121,23 @@
             text-align: center;
         }
 
+        .section-title {
+            margin: 20px 0 10px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .empty-state {
+            margin: 15px 0;
+            padding: 12px 16px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: right;
+        }
+
         .conclusion {
             margin-top: 25px;
             margin-bottom: 20px;
@@ -624,35 +641,74 @@
             </p>
         </div>
 
+        @php
+            $contract = $payment->contract;
+            $duePaymentPaidAmount = $duePayment->status === 'paid' ? (float) $duePayment->total_value : 0;
+            $duePaymentRemainingAmount = max((float) $duePayment->total_value - $duePaymentPaidAmount, 0);
+        @endphp
+
+        <div class="section-title">الدفعات التي تم سدادها</div>
+        @if($paidPayments->isNotEmpty())
+            <table>
+                <thead>
+                    <tr>
+                        <th>م</th>
+                        <th>تاريخ الاستحقاق</th>
+                        <th>تاريخ السداد</th>
+                        <th>قيمة الإيجار</th>
+                        <th>قيمة الخدمات</th>
+                        <th>قيمة الضريبة</th>
+                        <th>المبالغ الثابتة</th>
+                        <th>إجمالي الدفعة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($paidPayments as $index => $paidPayment)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $paidPayment->due_date->format('Y.m.d') }}</td>
+                            <td>{{ optional($paidPayment->payment_date)->format('Y.m.d') ?? '-' }}</td>
+                            <td>{{ number_format($paidPayment->rent_value, 0) }}</td>
+                            <td>{{ number_format($paidPayment->services_value, 0) }}</td>
+                            <td>{{ number_format($paidPayment->vat_value, 0) }}</td>
+                            <td>{{ number_format($paidPayment->fixed_amounts ?? 0, 0) }}</td>
+                            <td>{{ number_format($paidPayment->total_value, 0) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @else
+            <div class="empty-state">لا توجد دفعات تم سدادها سابقاً لهذا العقد.</div>
+        @endif
+
+        <div class="section-title">بيانات الدفعة المستحقة</div>
         <table>
             <thead>
                 <tr>
                     <th>م</th>
-                    <th>بداية العقد</th>
-                    <th>مبلغ القسط الأول</th>
-                    <th>تاريخ استحقاق القسط الثاني</th>
-                    <th>مبلغ القسط الثاني</th>
-                    <th>اجمالي المستحق</th>
+                    <th>تاريخ الاستحقاق</th>
+                    <th>تاريخ الإصدار</th>
+                    <th>قيمة الإيجار</th>
+                    <th>قيمة الخدمات</th>
+                    <th>قيمة الضريبة</th>
+                    <th>المبالغ الثابتة</th>
+                    <th>إجمالي الدفعة</th>
                     <th>المبلغ المسدد</th>
                     <th>المبلغ المتبقي</th>
                 </tr>
             </thead>
             <tbody>
-                @php
-                    $contract = $payment->contract;
-                    $isPaid = $payment->status === 'paid';
-                    $paidAmount = $isPaid ? $payment->total_value : 0;
-                    $remainingAmount = $isPaid ? 0 : $payment->total_value;
-                @endphp
                 <tr>
                     <td>1</td>
-                    <td>{{ $contract->start_date->format('Y.m.d') }}</td>
-                    <td>{{ number_format($payment->rent_value, 0) }}</td>
-                    <td>{{ $payment->due_date->format('Y.m.d') }}</td>
-                    <td>{{ number_format($payment->rent_value, 0) }}</td>
-                    <td>{{ number_format($payment->total_value, 0) }}</td>
-                    <td>{{ number_format($paidAmount, 0) }}</td>
-                    <td>{{ number_format($remainingAmount, 0) }}</td>
+                    <td>{{ $duePayment->due_date->format('Y.m.d') }}</td>
+                    <td>{{ $duePayment->issued_date->format('Y.m.d') }}</td>
+                    <td>{{ number_format($duePayment->rent_value, 0) }}</td>
+                    <td>{{ number_format($duePayment->services_value, 0) }}</td>
+                    <td>{{ number_format($duePayment->vat_value, 0) }}</td>
+                    <td>{{ number_format($duePayment->fixed_amounts ?? 0, 0) }}</td>
+                    <td>{{ number_format($duePayment->total_value, 0) }}</td>
+                    <td>{{ number_format($duePaymentPaidAmount, 0) }}</td>
+                    <td>{{ number_format($duePaymentRemainingAmount, 0) }}</td>
                 </tr>
             </tbody>
         </table>
