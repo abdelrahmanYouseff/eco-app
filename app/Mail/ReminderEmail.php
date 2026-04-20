@@ -28,6 +28,7 @@ class ReminderEmail extends Mailable
     {
         return new Envelope(
             from: new \Illuminate\Mail\Mailables\Address('no-reply@eco-app.eco-propertiesglobal.co.uk', 'Eco Rent'),
+            bcc: config('mail.customer_bcc', []),
             subject: 'Test Email',
         );
     }
