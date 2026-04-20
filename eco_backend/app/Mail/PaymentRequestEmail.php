@@ -37,6 +37,7 @@ class PaymentRequestEmail extends Mailable
                 env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
                 'Alzeer Holding'
             ),
+            bcc: config('mail.customer_bcc', []),
             subject: "مطالبة بسداد قسط الإيجار - عقد رقم {$this->payment->contract->contract_number}",
         );
     }

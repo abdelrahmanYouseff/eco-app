@@ -214,7 +214,19 @@ class PaymentController extends Controller
             $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
             $fromName = 'Alzeer Holding';
             $toEmail = $payment->contract->client->email;
+            $bccEmails = config('mail.customer_bcc', []);
             $subject = "مطالبة بسداد قسط الإيجار - عقد رقم {$payment->contract->contract_number}";
+
+            $emailPayload = [
+                'from' => $fromName . ' <' . $fromEmail . '>',
+                'to' => [$toEmail],
+                'subject' => $subject,
+                'html' => $html,
+            ];
+
+            if (!empty($bccEmails)) {
+                $emailPayload['bcc'] = $bccEmails;
+            }
 
             $response = $client->post('https://api.resend.com/emails', [
                 'headers' => [
@@ -222,12 +234,7 @@ class PaymentController extends Controller
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
                 ],
-                'json' => [
-                    'from' => $fromName . ' <' . $fromEmail . '>',
-                    'to' => [$toEmail],
-                    'subject' => $subject,
-                    'html' => $html,
-                ],
+                'json' => $emailPayload,
             ]);
 
             $result = json_decode($response->getBody()->getContents(), true);

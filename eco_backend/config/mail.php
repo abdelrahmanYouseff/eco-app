@@ -125,6 +125,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Customer Email BCC
+    |--------------------------------------------------------------------------
+    |
+    | Send a blind copy of customer-facing emails to these addresses.
+    |
+    */
+
+    'customer_bcc' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('MAIL_CUSTOMER_BCC', 'farook@adv-line.com'))
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Markdown Mail Settings
     |--------------------------------------------------------------------------
     |
