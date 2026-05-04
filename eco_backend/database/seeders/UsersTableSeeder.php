@@ -18,7 +18,7 @@ class UsersTableSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role' => 'building_admin',
                 'badge_id' => 'ADMIN001',
-                // 'company_id' => null, // أو id حقيقي لو مطلوب
+                // 'company_id' => null, // أو id حقيقي لو مطلوssب
             ]
         );
 
