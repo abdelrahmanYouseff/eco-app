@@ -35,6 +35,7 @@ class Contract extends Model
         'insurance_policy_number',
         'contract_pdf_path',
         'broker_id',
+        'electricity_meter_claim_sent_at',
     ];
 
     protected $casts = [
@@ -50,6 +51,7 @@ class Contract extends Model
         'vat_amount' => 'decimal:2',
         'general_services_amount' => 'decimal:2',
         'fixed_amounts' => 'decimal:2',
+        'electricity_meter_claim_sent_at' => 'datetime',
     ];
 
     /**

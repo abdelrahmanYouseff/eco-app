@@ -131,6 +131,11 @@ Route::middleware('auth')->group(function () {
         // Email Logs
         Route::get('/email-logs', [\App\PropertyManagement\Http\Controllers\Web\EmailLogController::class, 'index'])->name('email-logs.index');
 
+        // Electricity meter claims
+        Route::get('/electricity-meter-claims', [\App\PropertyManagement\Http\Controllers\Web\ElectricityMeterClaimController::class, 'index'])->name('electricity-meter-claims.index');
+        Route::get('/electricity-meter-claims/{contract}/preview', [\App\PropertyManagement\Http\Controllers\Web\ElectricityMeterClaimController::class, 'preview'])->name('electricity-meter-claims.preview');
+        Route::post('/electricity-meter-claims/{contract}/send-email', [\App\PropertyManagement\Http\Controllers\Web\ElectricityMeterClaimController::class, 'sendEmail'])->name('electricity-meter-claims.send-email');
+
         // Invoices
         Route::get('/invoices', [\App\PropertyManagement\Http\Controllers\Web\InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{id}', [\App\PropertyManagement\Http\Controllers\Web\InvoiceController::class, 'show'])->name('invoices.show');

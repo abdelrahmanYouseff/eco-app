@@ -92,6 +92,12 @@
                 <span class="pc-mtext">الوسطاء / الوكلاء</span>
               </a>
             </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.electricity-meter-claims.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-bolt"></i></span>
+                <span class="pc-mtext">مطالبة عداد الكهرباء</span>
+              </a>
+            </li>
           @else
             @if(auth()->user()->role !== 'accountant')
               <li class="pc-item">
@@ -174,6 +180,12 @@
               <a href="{{ route('property-management.email-logs.index') }}" class="pc-link">
                 <span class="pc-micon"><i class="ti ti-mail"></i></span>
                 <span class="pc-mtext">المراسلات الإلكترونية</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.electricity-meter-claims.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-bolt"></i></span>
+                <span class="pc-mtext">مطالبة عداد الكهرباء</span>
               </a>
             </li>
             <li class="pc-item">
