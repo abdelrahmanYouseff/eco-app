@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Models\Activity;
 
 class LoginController extends Controller
 {
@@ -26,11 +27,40 @@ class LoginController extends Controller
             ]);
         }
 
+        // Log login activity using Spatie ActivityLog
+        try {
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ])
+                ->log('تم تسجيل الدخول');
+        } catch (\Exception $e) {
+            // Silently fail if activity_log table doesn't exist
+            // This allows login to work even if migrations haven't been run
+        }
+
         return $this->redirectByRole(Auth::user()->role);
     }
 
     public function logout()
     {
+        // Log logout activity using Spatie ActivityLog
+        if (Auth::check()) {
+            try {
+                activity()
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'ip_address' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                    ])
+                    ->log('تم تسجيل الخروج');
+            } catch (\Exception $e) {
+                // Silently fail if activity_log table doesn't exist
+            }
+        }
+
         Auth::logout();
         return redirect('/');
     }
@@ -48,10 +78,12 @@ class LoginController extends Controller
     protected function redirectByRole(string $role)
     {
         return match ($role) {
-            'building_admin' => redirect()->route('building.owner.dashboard'),
+            'building_admin', 'accountant' => redirect()->route('building.owner.dashboard'),
             'company_admin' => redirect()->route('building.admin.dashboard'),
             'employee'      => redirect()->route('employee.dashboard'),
             'visitor'       => redirect()->route('visitor.dashboard'),
+            'editor'        => redirect()->route('property-management.buildings.index'),
+            'viewer'        => redirect()->route('property-management.buildings.index'), // Viewer has read-only access
             default         => redirect('/'),
         };
     }

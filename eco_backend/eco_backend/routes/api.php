@@ -9,6 +9,11 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\VisitorController;
 use App\Http\Controllers\Api\MaintenanceRequestController;
+<<<<<<< HEAD:eco_backend/eco_backend/routes/api.php
+=======
+use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\WebhookController;
+>>>>>>> 214f60c165b7db18fb2afc2c6aa07b4401e9122d:routes/api.php
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +35,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/companies/{id}', [CompanyController::class, 'show']);
     Route::post('/register', [UserController::class, 'register']);
     Route::get('/companies/{companyId}/employees', [UserController::class, 'employeesByCompany']);
+
+    // Live location updates (mobile app)
+    Route::post('/locations', [LocationController::class, 'store']);
 });
 
 Route::post('/login', [AuthController::class, 'login']);

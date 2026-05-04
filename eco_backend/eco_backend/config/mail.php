@@ -94,6 +94,17 @@ return [
                 'postmark',
             ],
         ],
+
+        'resend' => [
+            'transport' => 'smtp',
+            'host' => env('RESEND_SMTP_HOST', 'smtp.resend.com'),
+            'port' => env('RESEND_SMTP_PORT', 587),
+            'encryption' => env('RESEND_SMTP_ENCRYPTION', 'tls'),
+            'username' => env('RESEND_SMTP_USERNAME', 'resend'),
+            'password' => env('RESEND_API_KEY'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN'),
+        ],
     ],
 
     /*
@@ -111,6 +122,20 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Email BCC
+    |--------------------------------------------------------------------------
+    |
+    | Send a blind copy of customer-facing emails to these addresses.
+    |
+    */
+
+    'customer_bcc' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('MAIL_CUSTOMER_BCC', 'farook@adv-line.com'))
+    ))),
 
     /*
     |--------------------------------------------------------------------------
