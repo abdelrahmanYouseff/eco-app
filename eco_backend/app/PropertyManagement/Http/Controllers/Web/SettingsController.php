@@ -3,6 +3,7 @@
 namespace App\PropertyManagement\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\PropertyManagement\Support\ClaimMailSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -21,6 +22,12 @@ class SettingsController extends Controller
             'company_email' => Cache::get('settings.company_email', config('property_management.company_email', '')),
             'invoice_prefix' => Cache::get('settings.invoice_prefix', config('property_management.invoice_prefix', 'INV')),
             'receipt_prefix' => Cache::get('settings.receipt_prefix', config('property_management.receipt_prefix', 'REC')),
+            'claim_bank_iban' => Cache::has('settings.claim_bank_iban')
+                ? Cache::get('settings.claim_bank_iban')
+                : ClaimMailSettings::DEFAULT_BANK_IBAN,
+            'claim_cc_email' => Cache::has('settings.claim_cc_email')
+                ? Cache::get('settings.claim_cc_email')
+                : ClaimMailSettings::DEFAULT_CC_EMAIL,
         ];
 
         return view('property_management.settings.index', compact('settings'));
@@ -38,6 +45,18 @@ class SettingsController extends Controller
             'company_email' => 'nullable|email|max:255',
             'invoice_prefix' => 'required|string|max:10',
             'receipt_prefix' => 'required|string|max:10',
+            'claim_bank_iban' => 'nullable|string|max:34',
+            'claim_cc_email' => ['nullable', 'string', 'max:500', function ($attribute, $value, $fail) {
+                if ($value === null || trim($value) === '') {
+                    return;
+                }
+                foreach (explode(',', $value) as $email) {
+                    $email = trim($email);
+                    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $fail('بريد CC غير صالح: ' . $email);
+                    }
+                }
+            }],
         ]);
 
         // Store settings in cache

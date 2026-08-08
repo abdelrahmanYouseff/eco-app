@@ -138,6 +138,12 @@
                                         <th>وحدات التكييف:</th>
                                         <td>{{ $unit->ac_units ?? 0 }}</td>
                                     </tr>
+                                    @if($unit->electricity_account_number)
+                                    <tr>
+                                        <th>رقم حساب الكهرباء:</th>
+                                        <td><code>{{ $unit->electricity_account_number }}</code></td>
+                                    </tr>
+                                    @endif
                                     @if($unit->current_electricity_meter)
                                     <tr>
                                         <th>عداد الكهرباء الحالي:</th>

@@ -10,6 +10,7 @@ use App\Models\EmailLog;
 use App\PropertyManagement\Models\Contract;
 use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Services\Payments\PaymentService;
+use App\PropertyManagement\Support\ClaimMailSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -24,10 +25,15 @@ class PaymentController extends Controller
     {
         $query = RentPayment::with(['contract.client', 'contract.unit', 'contract.building']);
 
+        // Hide payments belonging to fully settled contracts
+        $query->whereHas('contract.rentPayments', function ($q) {
+            $q->whereIn('status', ['unpaid', 'partially_paid']);
+        });
+
         // Filter by status
         $status = $request->input('status', 'unpaid');
         if ($status === 'all') {
-            // Show all payments
+            // Show all payments for contracts that still have outstanding dues
         } elseif ($status === 'paid') {
             $query->where('status', 'paid');
         } elseif ($status === 'overdue') {
@@ -177,12 +183,12 @@ class PaymentController extends Controller
             }
 
             // Send email using Resend API directly
-            $apiKey = env('RESEND_API_KEY');
+            $apiKey = config('services.resend.api_key');
 
             if (!$apiKey) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'RESEND_API_KEY is not set in .env file'
+                    'message' => 'خدمة البريد غير مفعّلة. أضف RESEND_API_KEY في Environment على السيرفر (Forge) ثم نفّذ: php artisan config:clear',
                 ], 500);
             }
 
@@ -204,16 +210,17 @@ class PaymentController extends Controller
             $clientConfig = [
                 'timeout' => 30,
                 'connect_timeout' => 10,
-                'verify' => env('RESEND_VERIFY_SSL', true),
+                'verify' => config('services.resend.verify_ssl', true),
                 'allow_redirects' => true,
                 'http_errors' => true,
             ];
 
             $client = new \GuzzleHttp\Client($clientConfig);
 
-            $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
-            $fromName = 'Alzeer Holding';
+            $fromEmail = config('services.resend.from_email');
+            $fromName = config('services.resend.from_name');
             $toEmail = $payment->contract->client->email;
+            $ccEmails = ClaimMailSettings::ccEmails();
             $bccEmails = config('mail.customer_bcc', []);
             $subject = "مطالبة بسداد قسط الإيجار - عقد رقم {$payment->contract->contract_number}";
 
@@ -223,6 +230,10 @@ class PaymentController extends Controller
                 'subject' => $subject,
                 'html' => $html,
             ];
+
+            if (!empty($ccEmails)) {
+                $emailPayload['cc'] = $ccEmails;
+            }
 
             if (!empty($bccEmails)) {
                 $emailPayload['bcc'] = $bccEmails;
@@ -292,7 +303,7 @@ class PaymentController extends Controller
                     'contract_id' => $payment && $payment->contract ? $payment->contract->id : null,
                     'client_id' => $payment && $payment->contract && $payment->contract->client ? $payment->contract->client->id : null,
                     'to_email' => $payment && $payment->contract && $payment->contract->client ? ($payment->contract->client->email ?? 'unknown') : 'unknown',
-                    'from_email' => env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
+                    'from_email' => config('services.resend.from_email'),
                     'subject' => "مطالبة بسداد قسط الإيجار - عقد رقم {$contractNumber}",
                     'status' => 'failed',
                     'error_message' => $errorMessage,
@@ -317,7 +328,7 @@ class PaymentController extends Controller
                         'contract_id' => $payment->contract ? $payment->contract->id : null,
                         'client_id' => $payment->contract && $payment->contract->client ? $payment->contract->client->id : null,
                         'to_email' => $payment->contract && $payment->contract->client ? ($payment->contract->client->email ?? 'unknown') : 'unknown',
-                        'from_email' => env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
+                        'from_email' => config('services.resend.from_email'),
                         'subject' => "مطالبة بسداد قسط الإيجار - عقد رقم {$contractNumber}",
                         'status' => 'failed',
                         'error_message' => $e->getMessage(),
@@ -354,6 +365,7 @@ class PaymentController extends Controller
             'payment' => $payment,
             'duePayment' => $payment,
             'paidPayments' => $paidPayments,
+            'claimBankIban' => ClaimMailSettings::bankIban(),
         ];
     }
 }

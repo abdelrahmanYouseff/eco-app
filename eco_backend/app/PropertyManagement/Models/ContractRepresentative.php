@@ -23,7 +23,7 @@ class ContractRepresentative extends Model
     ];
 
     /**
-     * Get the contract that owns the representative.
+     * Get the contraaact that owns the representative.
      */
     public function contract(): BelongsTo
     {

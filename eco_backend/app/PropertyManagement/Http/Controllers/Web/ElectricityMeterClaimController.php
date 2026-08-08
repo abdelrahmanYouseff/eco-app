@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EmailLog;
 use App\PropertyManagement\Models\Client;
 use App\PropertyManagement\Models\Contract;
+use App\PropertyManagement\Support\ClaimMailSettings;
 use Illuminate\Http\Request;
 
 class ElectricityMeterClaimController extends Controller
@@ -68,11 +69,11 @@ class ElectricityMeterClaimController extends Controller
             ], 400);
         }
 
-        $apiKey = env('RESEND_API_KEY');
+        $apiKey = config('services.resend.api_key');
         if (!$apiKey) {
             return response()->json([
                 'success' => false,
-                'message' => 'RESEND_API_KEY is not set in .env file',
+                'message' => 'خدمة البريد غير مفعّلة. أضف RESEND_API_KEY في Environment على السيرفر (Forge) ثم نفّذ: php artisan config:clear',
             ], 500);
         }
 
@@ -83,15 +84,16 @@ class ElectricityMeterClaimController extends Controller
         $clientConfig = [
             'timeout' => 30,
             'connect_timeout' => 10,
-            'verify' => env('RESEND_VERIFY_SSL', true),
+            'verify' => config('services.resend.verify_ssl', true),
             'allow_redirects' => true,
             'http_errors' => true,
         ];
 
         $client = new \GuzzleHttp\Client($clientConfig);
-        $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
-        $fromName = 'Alzeer Holding';
+        $fromEmail = config('services.resend.from_email');
+        $fromName = config('services.resend.from_name');
         $toEmail = $contract->client->email;
+        $ccEmails = ClaimMailSettings::ccEmails();
         $bccEmails = config('mail.customer_bcc', []);
         $subject = 'إشعار للمستأجر بنقل عداد الكهرباء - عقد رقم ' . $contract->contract_number;
 
@@ -101,6 +103,9 @@ class ElectricityMeterClaimController extends Controller
             'subject' => $subject,
             'html' => $html,
         ];
+        if (!empty($ccEmails)) {
+            $emailPayload['cc'] = $ccEmails;
+        }
         if (!empty($bccEmails)) {
             $emailPayload['bcc'] = $bccEmails;
         }

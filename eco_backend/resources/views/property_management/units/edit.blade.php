@@ -214,6 +214,28 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
+                                    <label for="electricity_account_number" class="form-label fw-bold">
+                                        <i class="ti ti-id me-1"></i>
+                                        رقم حساب الكهرباء
+                                    </label>
+                                    <input type="text"
+                                           class="form-control @error('electricity_account_number') is-invalid @enderror"
+                                           id="electricity_account_number"
+                                           name="electricity_account_number"
+                                           value="{{ old('electricity_account_number', $unit->electricity_account_number) }}"
+                                           placeholder="رقم حساب الكهرباء لدى شركة الكهرباء">
+                                    @error('electricity_account_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3 d-flex align-items-end">
+                                    <p class="text-muted small mb-0">
+                                        منفصل عن <strong>قراءة عداد الكهرباء</strong> أدناه؛ يُستخدم لربط الفاتورة أو الاشتراك بالوحدة.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label for="current_electricity_meter" class="form-label fw-bold">
                                         <i class="ti ti-bolt me-1"></i>
                                         عداد الكهرباء الحالي

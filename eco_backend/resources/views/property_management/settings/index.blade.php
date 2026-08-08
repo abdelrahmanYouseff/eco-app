@@ -110,6 +110,43 @@
                                 </div>
                             </div>
 
+                            <!-- Claim / Payment request emails -->
+                            <div class="mb-4">
+                                <h6 class="mb-3" style="font-weight: 600; color: #212529; border-bottom: 2px solid #e9ecef; padding-bottom: 0.5rem;">إعدادات المطالبات (البريد)</h6>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="claim_bank_iban" class="form-label">رقم الآيبان (أبو نواف / FAHAD NAWAF ALZEER TRADING GROUP)</label>
+                                        <input type="text"
+                                               class="form-control @error('claim_bank_iban') is-invalid @enderror"
+                                               id="claim_bank_iban"
+                                               name="claim_bank_iban"
+                                               dir="ltr"
+                                               value="{{ old('claim_bank_iban', $settings['claim_bank_iban']) }}"
+                                               placeholder="SA82550000000R0877300433">
+                                        @error('claim_bank_iban')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">يظهر في كل مطالبة سداد إيجار مرسلة للعميل</small>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="claim_cc_email" class="form-label">بريد CC مع كل مطالبة</label>
+                                        <input type="text"
+                                               class="form-control @error('claim_cc_email') is-invalid @enderror"
+                                               id="claim_cc_email"
+                                               name="claim_cc_email"
+                                               dir="ltr"
+                                               value="{{ old('claim_cc_email', $settings['claim_cc_email']) }}"
+                                               placeholder="farook@adv-line.com">
+                                        @error('claim_cc_email')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">نسخة CC تُرسل مع كل مطالبة. أكثر من بريد: افصل بفاصلة</small>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="d-flex justify-content-end gap-2 mt-4">
                                 <button type="submit" class="btn btn-dark">
                                     <i class="ti ti-device-floppy"></i> حفظ الإعدادات

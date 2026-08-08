@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/contracts/bulk-delete', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'bulkDelete'])->name('contracts.bulk-delete');
         Route::post('/contracts/{contractId}/payments/{paymentId}/mark-as-paid', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'markPaymentAsPaid'])->name('contracts.payments.mark-as-paid');
         Route::get('/contracts/{id}/payments/{paymentId}/receipt', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'viewReceipt'])->name('contracts.payments.receipt');
+        Route::post('/contracts/{id}/payments/{paymentId}/receipt', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'uploadPaymentReceipt'])->name('contracts.payments.receipt.upload');
         Route::get('/contracts/{id}', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'show'])->name('contracts.show');
         Route::post('/contracts/{id}/upload-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'uploadPdf'])->name('contracts.upload-pdf');
         Route::get('/contracts/{id}/view-pdf', [\App\PropertyManagement\Http\Controllers\Web\ContractController::class, 'viewPdf'])->name('contracts.view-pdf');
@@ -130,6 +131,10 @@ Route::middleware('auth')->group(function () {
 
         // Email Logs
         Route::get('/email-logs', [\App\PropertyManagement\Http\Controllers\Web\EmailLogController::class, 'index'])->name('email-logs.index');
+
+        // Bulk email to clients/companies
+        Route::get('/bulk-email', [\App\PropertyManagement\Http\Controllers\Web\BulkEmailController::class, 'index'])->name('bulk-email.index');
+        Route::post('/bulk-email/send', [\App\PropertyManagement\Http\Controllers\Web\BulkEmailController::class, 'send'])->name('bulk-email.send');
 
         // Electricity meter claims
         Route::get('/electricity-meter-claims', [\App\PropertyManagement\Http\Controllers\Web\ElectricityMeterClaimController::class, 'index'])->name('electricity-meter-claims.index');
@@ -195,12 +200,12 @@ Route::get('/services/request', function () {
 // Test Email Route (for testing Resend email service)
 Route::get('/test-email', function () {
     try {
-        $apiKey = env('RESEND_API_KEY');
+        $apiKey = config('services.resend.api_key');
 
         if (!$apiKey) {
             return response()->json([
                 'success' => false,
-                'message' => 'RESEND_API_KEY is not set in .env file'
+                'message' => 'خدمة البريد غير مفعّلة. أضف RESEND_API_KEY في Environment على السيرفر (Forge) ثم نفّذ: php artisan config:clear',
             ], 500);
         }
 
@@ -212,7 +217,7 @@ Route::get('/test-email', function () {
         $clientConfig = [
             'timeout' => 30,
             'connect_timeout' => 10,
-            'verify' => env('RESEND_VERIFY_SSL', true), // Verify SSL certificates
+            'verify' => config('services.resend.verify_ssl', true), // Verify SSL certificates
             'allow_redirects' => true,
             'http_errors' => true,
         ];
@@ -221,10 +226,10 @@ Route::get('/test-email', function () {
 
         // Use custom from email from env, or use verified domain email
         // If domain is verified, use email from that domain to send to any recipient
-        $fromEmail = env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com');
+        $fromEmail = config('services.resend.from_email');
 
         // Set the recipient email
-        $testEmail = env('RESEND_TEST_EMAIL', 'abdelrahman.yousef@hadaf-hq.com');
+        $testEmail = config('services.resend.test_email', 'abdelrahman.yousef@hadaf-hq.com');
 
         $response = $client->post('https://api.resend.com/emails', [
             'headers' => [

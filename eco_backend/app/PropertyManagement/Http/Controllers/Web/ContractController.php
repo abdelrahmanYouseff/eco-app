@@ -10,6 +10,7 @@ use App\PropertyManagement\Models\RentPayment;
 use App\PropertyManagement\Models\Unit;
 use App\PropertyManagement\Services\Contracts\ContractService;
 use App\PropertyManagement\Services\Payments\PaymentService;
+use App\PropertyManagement\Support\ReceiptStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -317,7 +318,7 @@ class ContractController extends Controller
         }
 
         $request->validate([
-            'receipt_image' => 'required|mimes:pdf|max:10240', // Max 10MB, PDF only
+            'receipt_image' => 'required|mimes:pdf,jpg,jpeg,png,gif,webp|max:10240',
             'payment_notes' => 'nullable|string|max:2000',
         ]);
 
@@ -332,9 +333,9 @@ class ContractController extends Controller
                     ->with('warning', 'هذه الدفعة مدفوعة بالفعل');
             }
 
-            // Store receipt PDF
             $file = $request->file('receipt_image');
-            $fileName = 'receipt_' . $contract->contract_number . '_' . $paymentId . '_' . time() . '.pdf';
+            $extension = strtolower($file->getClientOriginalExtension() ?: 'pdf');
+            $fileName = 'receipt_' . $contract->contract_number . '_' . $paymentId . '_' . time() . '.' . $extension;
             $path = $file->storeAs('receipts', $fileName, 'public');
 
             // Update payment with receipt image path and notes
@@ -368,12 +369,14 @@ class ContractController extends Controller
     }
 
     /**
-     * View payment receipt image
+     * View payment receipt (PDF or image)
      */
     public function viewReceipt($id, $paymentId)
     {
+        $payment = null;
+
         try {
-            $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+            \App\PropertyManagement\Models\Contract::findOrFail($id);
             $payment = RentPayment::where('contract_id', $id)
                 ->where('id', $paymentId)
                 ->firstOrFail();
@@ -382,28 +385,88 @@ class ContractController extends Controller
                 abort(404, 'لا يوجد إيصال مرفق لهذه الدفعة');
             }
 
-            if (!Storage::disk('public')->exists($payment->receipt_image_path)) {
-                abort(404, 'ملف الإيصال غير موجود');
+            $filePath = ReceiptStorage::resolveAbsolutePath($payment->receipt_image_path);
+            if (!$filePath) {
+                \Illuminate\Support\Facades\Log::warning('Receipt file missing on server', [
+                    'contract_id' => $id,
+                    'payment_id' => $paymentId,
+                    'stored_path' => $payment->receipt_image_path,
+                    'normalized' => ReceiptStorage::normalizePath($payment->receipt_image_path),
+                    'checked_paths' => ReceiptStorage::candidateAbsolutePaths($payment->receipt_image_path),
+                ]);
+                abort(404, 'ملف الإيصال غير موجود على الخادم. تأكد من رفع الملف أو من إعداد SHARED_STORAGE_PUBLIC_ROOT على Forge.');
             }
 
-            // Get the full file path
-            $filePath = storage_path('app/public/' . $payment->receipt_image_path);
-
-            if (!file_exists($filePath)) {
-                abort(404, 'ملف الإيصال غير موجود');
-            }
-
-            // Determine the MIME type
-            $mimeType = mime_content_type($filePath) ?: 'application/pdf';
+            $filename = basename($payment->receipt_image_path);
+            $mimeType = $this->receiptMimeType($payment->receipt_image_path);
 
             return response()->file($filePath, [
                 'Content-Type' => $mimeType,
-                'Content-Disposition' => 'inline; filename="' . basename($payment->receipt_image_path) . '"',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
             ]);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error viewing receipt: ' . $e->getMessage());
-            abort(404, 'حدث خطأ أثناء عرض الإيصال: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error viewing receipt', [
+                'contract_id' => $id,
+                'payment_id' => $paymentId,
+                'path' => $payment?->receipt_image_path,
+                'message' => $e->getMessage(),
+            ]);
+            abort(404, 'حدث خطأ أثناء عرض الإيصال');
         }
+    }
+
+    /**
+     * Upload or replace a payment receipt file (e.g. DB path exists but file missing on disk).
+     */
+    public function uploadPaymentReceipt(Request $request, $id, $paymentId)
+    {
+        if (auth()->user()->role === 'viewer') {
+            return redirect()->route('property-management.contracts.show', $id)
+                ->with('error', 'ليس لديك صلاحية لرفع الإيصال');
+        }
+
+        $request->validate([
+            'receipt_image' => 'required|mimes:pdf,jpg,jpeg,png,gif,webp|max:10240',
+        ]);
+
+        $contract = \App\PropertyManagement\Models\Contract::findOrFail($id);
+        $payment = RentPayment::where('contract_id', $id)
+            ->where('id', $paymentId)
+            ->firstOrFail();
+
+        $disk = Storage::disk('public');
+        $oldPath = $payment->receipt_image_path;
+        if ($oldPath) {
+            $oldAbsolute = ReceiptStorage::resolveAbsolutePath($oldPath);
+            if ($oldAbsolute && is_file($oldAbsolute)) {
+                @unlink($oldAbsolute);
+            } elseif ($disk->exists($oldPath)) {
+                $disk->delete($oldPath);
+            }
+        }
+
+        $file = $request->file('receipt_image');
+        $extension = strtolower($file->getClientOriginalExtension() ?: 'pdf');
+        $fileName = 'receipt_' . $contract->contract_number . '_' . $paymentId . '_' . time() . '.' . $extension;
+        $path = $file->storeAs('receipts', $fileName, 'public');
+
+        $payment->receipt_image_path = $path;
+        $payment->save();
+
+        return redirect()->route('property-management.contracts.show', $id)
+            ->with('success', 'تم رفع الإيصال بنجاح.');
+    }
+
+    private function receiptMimeType(string $path): string
+    {
+        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'pdf' => 'application/pdf',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'application/octet-stream',
+        };
     }
 
     /**

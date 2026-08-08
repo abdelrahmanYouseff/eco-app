@@ -104,6 +104,7 @@ class UnitController extends Controller
             'current_electricity_meter' => 'nullable|string',
             'current_water_meter' => 'nullable|string',
             'current_gas_meter' => 'nullable|string',
+            'electricity_account_number' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -163,6 +164,7 @@ class UnitController extends Controller
             'current_electricity_meter' => 'nullable|string',
             'current_water_meter' => 'nullable|string',
             'current_gas_meter' => 'nullable|string',
+            'electricity_account_number' => 'nullable|string|max:255',
         ]);
 
         try {

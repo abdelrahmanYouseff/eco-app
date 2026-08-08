@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\PropertyManagement\Models\RentPayment;
+use App\PropertyManagement\Support\ClaimMailSettings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -34,9 +35,10 @@ class PaymentRequestEmail extends Mailable
 
         return new Envelope(
             from: new \Illuminate\Mail\Mailables\Address(
-                env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
-                'Alzeer Holding'
+                config('services.resend.from_email', 'info@alzeer-holding.com'),
+                config('services.resend.from_name', 'Alzeer Holding')
             ),
+            cc: ClaimMailSettings::ccEmails(),
             bcc: config('mail.customer_bcc', []),
             subject: "مطالبة بسداد قسط الإيجار - عقد رقم {$this->payment->contract->contract_number}",
         );
@@ -51,6 +53,7 @@ class PaymentRequestEmail extends Mailable
             view: 'emails.payment_request',
             with: [
                 'payment' => $this->payment,
+                'claimBankIban' => ClaimMailSettings::bankIban(),
             ],
         );
     }

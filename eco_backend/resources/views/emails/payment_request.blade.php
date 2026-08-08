@@ -440,7 +440,7 @@
 
         <div class="bank-details">
             <p><strong>اسم الحساب :</strong> FAHAD NAWAF ALZEER TRADING GROUP</p>
-            <p><strong>رقم الايبان :</strong> SA825500000000877300433</p>
+            <p><strong>رقم الايبان :</strong> {{ $claimBankIban ?? \App\PropertyManagement\Support\ClaimMailSettings::bankIban() }}</p>
             <p><strong>اسم البنك :</strong> البنك السعودي الفرنسي</p>
             <p><strong>كود سويفت :</strong> BSFRSARI</p>
         </div>

@@ -125,6 +125,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Customer Email CC (مطالبات — نسخة ظاهرة للمستلم)
+    |--------------------------------------------------------------------------
+    */
+
+    'customer_cc' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('MAIL_CUSTOMER_CC', 'farook@adv-line.com'))
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Customer Email BCC
     |--------------------------------------------------------------------------
     |
@@ -134,7 +145,7 @@ return [
 
     'customer_bcc' => array_values(array_filter(array_map(
         'trim',
-        explode(',', (string) env('MAIL_CUSTOMER_BCC', 'farook@adv-line.com'))
+        explode(',', (string) env('MAIL_CUSTOMER_BCC', ''))
     ))),
 
     /*

@@ -31,4 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'resend' => [
+        'api_key' => env('RESEND_API_KEY'),
+        'from_email' => env('RESEND_FROM_EMAIL', 'info@alzeer-holding.com'),
+        'from_name' => env('RESEND_FROM_NAME', 'Alzeer Holding'),
+        'verify_ssl' => env('RESEND_VERIFY_SSL', true),
+        'test_email' => env('RESEND_TEST_EMAIL'),
+    ],
+
 ];

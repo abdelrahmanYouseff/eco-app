@@ -73,4 +73,10 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+    /*
+    | Forge / multi-release: set to site-level shared storage (not a single release).
+    | Example: /home/forge/eco-app.eco-propertiesglobal.co.uk/storage/app/public
+    */
+    'shared_public_root' => env('SHARED_STORAGE_PUBLIC_ROOT'),
+
 ];

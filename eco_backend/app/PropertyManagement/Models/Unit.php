@@ -26,6 +26,7 @@ class Unit extends Model
         'current_electricity_meter',
         'current_water_meter',
         'current_gas_meter',
+        'electricity_account_number',
     ];
 
     protected $casts = [

@@ -85,6 +85,12 @@
                 <span class="pc-mtext">المراسلات الإلكترونية</span>
               </a>
             </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.bulk-email.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-mail-forward"></i></span>
+                <span class="pc-mtext">البريد الإلكتروني</span>
+              </a>
+            </li>
             @endif
             <li class="pc-item">
               <a href="{{ route('property-management.brokers.index') }}" class="pc-link">
@@ -180,6 +186,12 @@
               <a href="{{ route('property-management.email-logs.index') }}" class="pc-link">
                 <span class="pc-micon"><i class="ti ti-mail"></i></span>
                 <span class="pc-mtext">المراسلات الإلكترونية</span>
+              </a>
+            </li>
+            <li class="pc-item">
+              <a href="{{ route('property-management.bulk-email.index') }}" class="pc-link">
+                <span class="pc-micon"><i class="ti ti-mail-forward"></i></span>
+                <span class="pc-mtext">البريد الإلكتروني</span>
               </a>
             </li>
             <li class="pc-item">

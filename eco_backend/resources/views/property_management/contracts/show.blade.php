@@ -458,13 +458,35 @@
                                             @endif
                                         </td>
                                         <td class="text-center align-middle">
-                                            @if($payment->receipt_image_path)
+                                            @php
+                                                $hasReceiptFile = $payment->receipt_image_path
+                                                    && \App\PropertyManagement\Support\ReceiptStorage::exists($payment->receipt_image_path);
+                                                $canAttachReceipt = auth()->user()->role !== 'viewer'
+                                                    && in_array($payment->status, ['paid', 'partially_paid'], true);
+                                            @endphp
+                                            @if($hasReceiptFile)
                                                 <button type="button"
                                                         class="btn btn-sm btn-info"
                                                         title="عرض الإيصال"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#receiptModal{{ $payment->id }}">
-                                                    <i class="ti ti-file-image"></i> عرض الإيصال
+                                                    <i class="ti ti-file-type"></i> عرض الإيصال
+                                                </button>
+                                            @elseif($canAttachReceipt)
+                                                <button type="button"
+                                                        class="btn btn-sm btn-warning"
+                                                        title="إرفاق الإيصال"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#attachReceiptModal{{ $payment->id }}">
+                                                    <i class="ti ti-upload"></i> إرفاق الإيصال
+                                                </button>
+                                            @elseif($payment->receipt_image_path)
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-info"
+                                                        title="عرض / استبدال الإيصال"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#receiptModal{{ $payment->id }}">
+                                                    <i class="ti ti-file-type"></i> عرض الإيصال
                                                 </button>
                                             @else
                                                 <span class="text-muted">-</span>
@@ -837,18 +859,18 @@
                             <h6 class="mb-3">رفع ملف الإيصال</h6>
                             <div class="mb-2">
                                 <label for="receipt_image{{ $payment->id }}" class="form-label">
-                                    <strong>ملف الإيصال PDF <span class="text-danger">*</span></strong>
+                                    <strong>ملف الإيصال (PDF أو صورة) <span class="text-danger">*</span></strong>
                                 </label>
                                 <input type="file"
                                        class="form-control @error('receipt_image') is-invalid @enderror"
                                        id="receipt_image{{ $payment->id }}"
                                        name="receipt_image"
-                                       accept=".pdf,application/pdf"
+                                       accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/*"
                                        required>
                                 @error('receipt_image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted">الحد الأقصى لحجم الملف: 10 ميجابايت (PDF فقط)</small>
+                                <small class="text-muted">الحد الأقصى لحجم الملف: 10 ميجابايت — PDF أو صورة (JPG, PNG, GIF, WebP)</small>
                             </div>
                             <div class="mt-3">
                                 <label for="payment_notes{{ $payment->id }}" class="form-label">
@@ -882,6 +904,57 @@
 @endif
 @endforeach
 
+<!-- إرفاق إيصال (دفعة مدفوعة بدون ملف) -->
+@foreach($contract->rentPayments->sortBy('due_date') as $payment)
+@php
+    $__hasReceiptFile = $payment->receipt_image_path
+        && \App\PropertyManagement\Support\ReceiptStorage::exists($payment->receipt_image_path);
+    $__canAttachReceipt = auth()->user()->role !== 'viewer'
+        && in_array($payment->status, ['paid', 'partially_paid'], true)
+        && !$__hasReceiptFile;
+@endphp
+@if($__canAttachReceipt)
+<div class="modal fade" id="attachReceiptModal{{ $payment->id }}" tabindex="-1" aria-labelledby="attachReceiptModalLabel{{ $payment->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attachReceiptModalLabel{{ $payment->id }}">
+                    <i class="ti ti-upload me-2"></i>
+                    إرفاق إيصال — دفعة {{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('property-management.contracts.payments.receipt.upload', ['id' => $contract->id, 'paymentId' => $payment->id]) }}"
+                  method="POST"
+                  enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">
+                        الدفعة مسجّلة كـ <strong>مدفوعة</strong> لكن لا يوجد ملف إيصال على السيرفر. ارفع PDF أو صورة (حد أقصى 10 ميجابايت).
+                    </p>
+                    <label for="attach_receipt_image{{ $payment->id }}" class="form-label fw-bold">
+                        ملف الإيصال <span class="text-danger">*</span>
+                    </label>
+                    <input type="file"
+                           class="form-control"
+                           id="attach_receipt_image{{ $payment->id }}"
+                           name="receipt_image"
+                           accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/*"
+                           required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="ti ti-upload me-1"></i> حفظ الإيصال
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+@endforeach
+
 <!-- Receipt Image Modals -->
 @foreach($contract->rentPayments->sortBy('due_date') as $payment)
 @if($payment->receipt_image_path)
@@ -890,25 +963,92 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="receiptModalLabel{{ $payment->id }}">
-                    <i class="ti ti-file-pdf me-2"></i>
+                    @php
+                        $__receiptExt = strtolower(pathinfo($payment->receipt_image_path, PATHINFO_EXTENSION));
+                        $__isImg = in_array($__receiptExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+                    @endphp
+                    <i class="ti {{ $__isImg ? 'ti-photo' : 'ti-file-type' }} me-2"></i>
                     إيصال الدفعة - {{ \Carbon\Carbon::parse($payment->due_date)->format('Y-m-d') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <iframe src="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}"
-                        style="width: 100%; height: 70vh; border: 1px solid #dee2e6; border-radius: 8px;"
-                        frameborder="0">
-                </iframe>
+                @php
+                    $receiptFileExists = \App\PropertyManagement\Support\ReceiptStorage::exists($payment->receipt_image_path);
+                    $receiptExt = strtolower(pathinfo($payment->receipt_image_path, PATHINFO_EXTENSION));
+                    $receiptIsImage = in_array($receiptExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+                    $receiptIsPdf = $receiptExt === 'pdf';
+                    $receiptUrl = route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]);
+                @endphp
+                @if(!$receiptFileExists)
+                    <div class="alert alert-warning text-start mb-0">
+                        <strong>ملف الإيصال غير موجود على الخادم.</strong>
+                        <p class="mb-1 mt-2 small">المسار المحفوظ في قاعدة البيانات:</p>
+                        <code dir="ltr" class="d-block">{{ $payment->receipt_image_path }}</code>
+                        <p class="mb-2 mt-2 small text-muted">
+                            غالبًا السبب: نقل قاعدة بيانات من بيئة أخرى دون نسخ ملفات <code dir="ltr">storage/app/public/receipts/</code>، أو مسح ملفات أثناء نشر إصدارات Forge.
+                        </p>
+                        @if(auth()->user()->role !== 'viewer')
+                        <hr class="my-3">
+                        <p class="small fw-semibold mb-2">رفع الإيصال الآن (يستبدل المسار في قاعدة البيانات ويحفظ الملف على السيرفر):</p>
+                        <form action="{{ route('property-management.contracts.payments.receipt.upload', ['id' => $contract->id, 'paymentId' => $payment->id]) }}"
+                              method="POST"
+                              enctype="multipart/form-data"
+                              class="d-flex flex-wrap align-items-end gap-2">
+                            @csrf
+                            <div class="flex-grow-1" style="min-width: 200px;">
+                                <input type="file"
+                                       name="receipt_image"
+                                       class="form-control form-control-sm"
+                                       accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/*"
+                                       required>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                <i class="ti ti-upload me-1"></i> رفع الإيصال
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+                @elseif($receiptIsImage)
+                    <img src="{{ $receiptUrl }}"
+                         alt="إيصال الدفعة"
+                         class="img-fluid rounded border"
+                         style="max-height: 70vh; object-fit: contain;">
+                @elseif($receiptIsPdf)
+                    <object data="{{ $receiptUrl }}#view=FitH"
+                            type="application/pdf"
+                            style="width: 100%; height: 70vh; border: 1px solid #dee2e6; border-radius: 8px;">
+                        <iframe src="{{ $receiptUrl }}"
+                                style="width: 100%; height: 70vh; border: 0;"
+                                title="إيصال PDF"></iframe>
+                    </object>
+                    <p class="text-muted small mt-2 mb-0">
+                        إذا لم يظهر الملف، استخدم «فتح في تبويب جديد» من الأسفل أو حمّل الإيصال.
+                    </p>
+                @else
+                    <iframe src="{{ $receiptUrl }}"
+                            style="width: 100%; height: 70vh; border: 1px solid #dee2e6; border-radius: 8px;"
+                            frameborder="0"
+                            title="إيصال"></iframe>
+                @endif
             </div>
             <div class="modal-footer">
-                <a href="{{ route('property-management.contracts.payments.receipt', ['id' => $contract->id, 'paymentId' => $payment->id]) }}"
+                @if($receiptFileExists)
+                <a href="{{ $receiptUrl }}"
+                   class="btn btn-outline-primary"
+                   target="_blank"
+                   rel="noopener">
+                    <i class="ti ti-external-link me-1"></i>
+                    فتح في تبويب جديد
+                </a>
+                <a href="{{ $receiptUrl }}"
                    class="btn btn-primary"
                    target="_blank"
                    download>
                     <i class="ti ti-download me-1"></i>
                     تحميل الإيصال
                 </a>
+                @endif
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
             </div>
         </div>
