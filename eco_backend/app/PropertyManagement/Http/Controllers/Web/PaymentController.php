@@ -38,18 +38,18 @@ class PaymentController extends Controller
             $query->where('status', 'paid');
         } elseif ($status === 'overdue') {
             $query->whereIn('status', ['unpaid', 'partially_paid'])
-                  ->whereDate('issued_date', '<', now()->toDateString());
+                  ->where('due_date', '<', now()->toDateString());
         } else {
             // unpaid or partially_paid
             $query->whereIn('status', ['unpaid', 'partially_paid']);
         }
 
-        // Filter by date range (contract installment date = issued_date)
+        // Filter by date range (due date)
         if ($request->filled('date_from')) {
-            $query->whereDate('issued_date', '>=', $request->input('date_from'));
+            $query->where('due_date', '>=', $request->input('date_from'));
         }
         if ($request->filled('date_to')) {
-            $query->whereDate('issued_date', '<=', $request->input('date_to'));
+            $query->where('due_date', '<=', $request->input('date_to'));
         }
 
         // Filter by company (from clients table where client_type = 'شركة')
@@ -59,7 +59,7 @@ class PaymentController extends Controller
             });
         }
 
-        $payments = $query->orderBy('issued_date', 'asc')->paginate(20);
+        $payments = $query->orderBy('due_date', 'asc')->paginate(20);
 
         // Get companies for filter dropdown (clients where client_type = 'شركة')
         $companies = \App\PropertyManagement\Models\Client::where('client_type', 'شركة')
