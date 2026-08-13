@@ -104,12 +104,13 @@
                                                 </a>
                                             </td>
                                             <td>{{ $payment->contract->client->name ?? '—' }}</td>
-                                            <td>{{ $payment->due_date->format('Y-m-d') }}</td>
+                                            <td>{{ ($payment->issued_date ?? $payment->due_date)->format('Y-m-d') }}</td>
                                             <td class="text-center">
                                                 @php
                                                     $daysOverdue = 0;
-                                                    if ($payment->status !== 'paid' && $payment->due_date < now()) {
-                                                        $daysOverdue = now()->diffInDays($payment->due_date);
+                                                    $displayDueDate = $payment->issued_date ?? $payment->due_date;
+                                                    if ($payment->status !== 'paid' && $displayDueDate < now()) {
+                                                        $daysOverdue = now()->diffInDays($displayDueDate);
                                                     }
                                                 @endphp
                                                 @if($daysOverdue > 0)
